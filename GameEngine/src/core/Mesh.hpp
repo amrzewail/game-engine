@@ -18,7 +18,7 @@ private:
 
 public:
 
-
+	Mesh();
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
 	~Mesh();
 

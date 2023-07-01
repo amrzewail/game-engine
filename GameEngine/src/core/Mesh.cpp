@@ -33,6 +33,11 @@ void Mesh::SetupMesh()
 
 }
 
+Mesh::Mesh()
+{
+	this->vertices = std::vector<Vertex>();
+	this->indices = std::vector<unsigned int>();
+}
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices)
 {

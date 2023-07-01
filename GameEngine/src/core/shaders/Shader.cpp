@@ -138,3 +138,14 @@ void Shader::SetColor(const std::string& name, const Color& c) const
 	}
 	glUniform4f(loc, c.r, c.g, c.b, c.a);
 }
+
+void Shader::SetMatrix4x4(const std::string& name, const Matrix4x4& m) const
+{
+	const int loc = glGetUniformLocation(id, name.c_str());
+	if (loc < 0)
+	{
+		std::cerr << "Couldn't find " << name << std::endl;
+		exit(1);
+	}
+	glUniformMatrix4fv(loc, 1, GL_FALSE, m.Data());
+}

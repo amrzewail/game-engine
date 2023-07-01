@@ -46,6 +46,11 @@ public:
 		return quaternion;
 	}
 
+	Quaternion()
+	{
+		_quaternion = new fquat(1, 0, 0, 0);
+	}
+
 	Quaternion(float w, float x, float y, float z)
 	{
 		_quaternion = new fquat(w, x, y, z);

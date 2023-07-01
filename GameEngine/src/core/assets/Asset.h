@@ -5,6 +5,13 @@ class Asset
 
 public:
 
+	const char* path;
+
+	Asset(const char* path) : path(path)
+	{
+
+	}
+
 	virtual void Deserialize(char* bytes, size_t length) = 0;
 
 };

@@ -1,4 +1,5 @@
 #pragma once
+#include "../MeshContainer.hpp"
 
 using std::allocator;
 
@@ -6,10 +7,10 @@ class ModelAsset : public Asset
 {
 private:
 	const aiScene* _scene;
-	std::vector<Mesh*> _meshes;
+	std::vector<MeshContainer*> _meshes;
 
 
-	Mesh* ProcessMesh(aiMesh* mesh)
+	MeshContainer* ProcessMesh(aiMesh* mesh)
 	{
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
@@ -61,40 +62,49 @@ private:
 			}
 		}
 
-		std::cout << "Loaded mesh with vertices: " << vertices.size() << ", indices: " << indices.size() << std::endl;
+		MeshContainer* container = new MeshContainer();
 
-		return new Mesh(vertices, indices);
+		Mesh* m = new Mesh(vertices, indices);
 
-		//std::vector<Vertex> obj_pts;
+		container->mesh = m;
 
-		//Vertex v1;
-		//v1.position = Vector(.5f, -.5f, 0.f);
-		//obj_pts.push_back(v1);
-
-		//Vertex v2;
-		//v2.position = Vector(-.5f, -.5f, 0.f);
-		//obj_pts.push_back(v2);
-
-		//Vertex v3;
-		//v3.position = Vector(0.f, .5f, 0.f);
-		//obj_pts.push_back(v3);
-
-		//std::vector<uint32_t> elem = { 0, 1, 2 };
-
-		//return new Mesh(obj_pts, elem);
+		if (_scene->HasMaterials())
+		{
+			aiMaterial* material = _scene->mMaterials[mesh->mMaterialIndex];
+			aiString materialName;
+			aiReturn ret;
+			ret = material->Get(AI_MATKEY_NAME, materialName);
+			if (ret != AI_SUCCESS) materialName = "";
+			*container->materialName = materialName.C_Str();
+			*container->materialIndex = mesh->mMaterialIndex;
+		}
 
 
+		std::cout << "Loaded mesh with material: " << *container->materialName << " with vertices: " << vertices.size() << ", indices: " << indices.size() << std::endl;
+
+		return container;
 	}
 
 	void ProcessNode(aiNode* node)
 	{
-		// process all the node's meshes (if any)
-		for (unsigned int i = 0; i < node->mNumMeshes; i++)
+		if (node->mNumMeshes > 0)
 		{
-			aiMesh* aMesh = _scene->mMeshes[node->mMeshes[i]];
-			Mesh* mesh = ProcessMesh(aMesh);
-			_meshes.push_back(mesh);
+			std::cout << "Loading node: " << node->mName.C_Str() << std::endl;
+
+			// process all the node's meshes (if any)
+			for (unsigned int i = 0; i < node->mNumMeshes; i++)
+			{
+				aiMesh* aMesh = _scene->mMeshes[node->mMeshes[i]];
+
+				MeshContainer* container = ProcessMesh(aMesh);
+
+				_meshes.push_back(container);
+
+			}
+
+			std::cout << std::endl;
 		}
+
 		// then do the same for each of its children
 		for (unsigned int i = 0; i < node->mNumChildren; i++)
 		{
@@ -106,9 +116,14 @@ private:
 
 public:
 
-	std::vector<Mesh*> Meshes()
+	std::vector<MeshContainer*> Meshes()
 	{
 		return _meshes;
+	}
+
+	ModelAsset(const char* path) : Asset(path)
+	{
+
 	}
 
 	~ModelAsset()

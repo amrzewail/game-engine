@@ -27,4 +27,10 @@ public:
 	{
 		return '(' + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z) + ')';
 	}
+
+
+	Vector* operator +(Vector& rhs) const
+	{
+		return new Vector(x + rhs.x, y + rhs.y, z + rhs.z);
+	}
 };

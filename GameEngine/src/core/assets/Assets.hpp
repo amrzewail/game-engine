@@ -49,7 +49,7 @@ public:
 
 		infile.close();
 
-		T* asset = new T();
+		T* asset = new T(path);
 		asset->Deserialize(bytes, length);
 
 		_loadedAssets[path] = asset;

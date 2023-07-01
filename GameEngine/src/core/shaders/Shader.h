@@ -1,3 +1,5 @@
+#pragma once
+
 #include <glad/glad.h>
 
 #include <string>
@@ -6,6 +8,7 @@
 #include "../assets/TextAsset.hpp"
 #include "../assets/Assets.hpp"
 #include "../Color.h"
+#include "../Matrix4x4.hpp"
 
 
 class Shader
@@ -30,5 +33,5 @@ public:
 	void SetVector(const std::string& name, float x, float y, float z) const;
 	void SetVector(const std::string& name, const Vector& v) const;
 	void SetColor(const std::string& name, const Color& c) const;
-
+	void SetMatrix4x4(const std::string& name, const Matrix4x4& m) const;
 };

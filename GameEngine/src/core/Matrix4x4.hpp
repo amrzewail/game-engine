@@ -13,10 +13,20 @@ struct Matrix4x4
 private:
 
 	mat4* _matrix;
+	float* _data;
 
 	mat4 Value()
 	{
 		return *_matrix;
+	}
+
+	static Matrix4x4* FromMat4(glm::mat4 mat)
+	{
+		return new Matrix4x4(
+			mat[0][0], mat[0][1], mat[0][2], mat[0][3],
+			mat[1][0], mat[1][1], mat[1][2], mat[1][3],
+			mat[2][0], mat[2][1], mat[2][2], mat[2][3],
+			mat[3][0], mat[3][1], mat[3][2], mat[3][3]);
 	}
 
 public:
@@ -35,82 +45,43 @@ public:
 	{
 		Quaternion q = *quaternion.Normalized();
 
-		float q0 = q.W();
-		float q1 = q.X();
-		float q2 = q.Y();
-		float q3 = q.Z();
-
-		float q0q0 = q0 * q0;
-		float q0q1 = q0 * q1;
-		float q0q2 = q0 * q2;
-		float q0q3 = q0 * q3;
-
-		float q1q0 = q1 * q0;
-		float q1q1 = q1 * q1;
-		float q1q2 = q1 * q2;
-		float q1q3 = q1 * q3;
-
-		float q2q0 = q2 * q0;
-		float q2q1 = q2 * q1;
-		float q2q2 = q2 * q2;
-		float q2q3 = q2 * q3;
-
-		float q3q0 = q3 * q0;
-		float q3q1 = q3 * q1;
-		float q3q2 = q3 * q2;
-		float q3q3 = q3 * q3;
-
-		float m11 = 2 * (q0q0 + q1q1) - 1;
-		float m12 = 2 * (q1q2 - q0q3);
-		float m13 = 2 * (q1q3 + q0q2);
-
-		float m21 = 2 * (q1q2 + q0q3);
-		float m22 = 2 * (q0q0 + q2q2) - 1;
-		float m23 = 2 * (q2q3 - q0q1);
-
-		float m31 = 2 * (q1q3 - q0q2);
-		float m32 = 2 * (q2q3 + q0q1);
-		float m33 = 2 * (q0q0 + q3q3) - 1;
-
-		Matrix4x4* m = new Matrix4x4(
-			m11, m12, m13, 0,
-			m21, m22, m23, 0,
-			m31, m32, m33, 0,
-			0, 0, 0, 1
-		);
-
-		return m;
+		return FromMat4(glm::mat4_cast(glm::fquat(quaternion.W(), quaternion.X(), quaternion.Y(), quaternion.Z())));
 	}
 
 	static Matrix4x4* Translate(Vector& vector)
 	{
-		return new Matrix4x4(
-			1, 0, 0, vector.x,
-			0, 1, 0, vector.y,
-			0, 0, 1, vector.z,
-			0, 0, 0, 1
-		);
+		return FromMat4(glm::translate(mat4(1.0), vec3(vector.x, vector.y, vector.z)));
 	}
 
 	static Matrix4x4* Scale(Vector& vector)
 	{
-		return new Matrix4x4(
-			vector.x, 0, 0, 0,
-			0, vector.y, 0, 0,
-			0, 0, vector.z, 0,
-			0, 0, 0, 1
-		);
+		return FromMat4(glm::scale(mat4(1.0), vec3(vector.x, vector.y, vector.z)));
 	}
 
 	static Matrix4x4* TRS(Vector& translation, Quaternion& rotation, Vector& scale)
 	{
-		Matrix4x4 t = *Translate(translation);
-		Matrix4x4 r = *Rotate(rotation);
-		Matrix4x4 s = *Scale(scale);
+		mat4 trans = glm::translate(glm::mat4(1.0f), glm::vec3(translation.x, translation.y, translation.z));
+		mat4 rotate = glm::mat4_cast(glm::fquat(rotation.W(), rotation.X(), rotation.Y(), rotation.Z()));
+		mat4 scaleMat = glm::scale(glm::mat4(1.0), glm::vec3(scale.x, scale.y, scale.z));
 
-		Matrix4x4* trs = s * *(r * t);
+		return FromMat4(trans * rotate * scaleMat);
 
-		return trs;
+	}
+
+	static Matrix4x4* Perspective(float fov, float aspect, float zNear, float zFar)
+	{
+		fov = glm::radians(fov);
+		return FromMat4(glm::perspective(fov, aspect, zNear, zFar));
+	}
+
+	static Matrix4x4* Inverse(Matrix4x4& matrix)
+	{
+		return FromMat4(glm::inverse(matrix.Value()));
+	}
+
+	static Matrix4x4* LookAt(Vector& from, Vector& to, Vector& up)
+	{
+		return FromMat4(glm::lookAt(glm::vec3(from.x, from.y, from.z), glm::vec3(to.x, to.y, to.z), glm::vec3(up.x, up.y, up.z)));
 	}
 
 	Matrix4x4(	
@@ -120,19 +91,35 @@ public:
 		float x3, float y3, float z3, float w3)
 	{
 		_matrix = new mat4(x0, y0, z0, w0, x1, y1, z1, w1, x2, y2, z2, w2, x3, y3, z3, w3);
+
+		_data = new float[4 * 4];
+		int index = 0;
+		for (int x = 0; x < 4; ++x)
+		{
+			for (int y = 0; y < 4; ++y)
+			{
+				_data[index++] = (*_matrix)[x][y];
+			}
+		}
 	}
 
 	~Matrix4x4()
 	{
 		delete _matrix;
+		delete[] _data;
 	}
 
-	float At(int row, int column)
+	float At(int row, int column) const
 	{
-		return (*_matrix)[row][column];
+		return (*_matrix)[column][row];
 	}
 
-	std::string ToString()
+	float* Data() const
+	{
+		return _data;
+	}
+
+	std::string ToString() const
 	{
 		std::string s;
 		for (int row = 0; row < 4; ++row)
@@ -152,11 +139,7 @@ public:
 		mat4 rhsM = rhs.Value();
 		rhsM = (*_matrix) * rhsM;
 
-		return new Matrix4x4(
-			rhsM[0][0], rhsM[0][1], rhsM[0][2], rhsM[0][3],
-			rhsM[1][0], rhsM[1][1], rhsM[1][2], rhsM[1][3],
-			rhsM[2][0], rhsM[2][1], rhsM[2][2], rhsM[2][3],
-			rhsM[3][0], rhsM[3][1], rhsM[3][2], rhsM[3][3]);
+		return FromMat4(rhsM);
 
 	}
 

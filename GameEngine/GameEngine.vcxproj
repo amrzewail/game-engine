@@ -149,6 +149,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\Texture.hpp" />
+    <ClCompile Include="src\libs\image.cpp" />
     <ClCompile Include="src\core\assets\Assets.cpp" />
     <ClCompile Include="src\core\Mesh.cpp" />
     <ClCompile Include="src\core\shaders\Shader.cpp" />
@@ -156,20 +158,28 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Asset.h" />
+    <ClInclude Include="src\core\Material.hpp" />
+    <ClInclude Include="src\core\MeshContainer.hpp" />
+    <ClInclude Include="src\core\MeshRenderer.hpp" />
+    <ClInclude Include="src\libs\image.h" />
     <ClInclude Include="src\Callbacks.h" />
     <ClInclude Include="src\core\assets\Asset.h" />
     <ClInclude Include="src\core\assets\Assets.hpp" />
     <ClInclude Include="src\core\assets\ModelAsset.hpp" />
     <ClInclude Include="src\core\assets\TextAsset.hpp" />
+    <ClInclude Include="src\core\assets\TextureAsset.hpp" />
+    <ClInclude Include="src\core\Camera.hpp" />
     <ClInclude Include="src\core\Color.h" />
     <ClInclude Include="src\core\Matrix4x4.hpp" />
     <ClInclude Include="src\core\Mesh.hpp" />
     <ClInclude Include="src\core\Quaternion.hpp" />
     <ClInclude Include="src\core\shaders\Shader.h" />
+    <ClInclude Include="src\core\Transform.hpp" />
     <ClInclude Include="src\core\Vector.h" />
     <ClInclude Include="src\core\Vector2.h" />
     <ClInclude Include="src\core\Vertex.h" />
     <ClInclude Include="src\Input.h" />
+    <ClInclude Include="src\libs\stb_image.h" />
     <ClInclude Include="src\OpenGLDraw.h" />
     <ClInclude Include="src\OpenGLLoader.h" />
     <ClInclude Include="src\GLSLShaderLoader.h" />
@@ -178,6 +188,7 @@
     <ClInclude Include="src\DrawDetails.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\shaders\chainmail.frag" />
     <None Include="assets\shaders\lit.frag" />
     <None Include="assets\shaders\lit.vert" />
     <None Include="C:\Programming\Project Painter\Assets\Models\Jayne\Jayne.fbx" />

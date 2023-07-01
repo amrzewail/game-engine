@@ -12,6 +12,11 @@ private:
 
 public:
 
+	TextAsset(const char* path) : Asset(path)
+	{
+
+	}
+
 	~TextAsset()
 	{
 		delete[] _chars;
