@@ -35,10 +35,43 @@
 #include "core/assets/ModelAsset.hpp"
 
 #include "core/shaders/Shader.h"
-
+#include "core/Matrix4x4.hpp"
+#include "core/Quaternion.hpp"
 
 int main(int argc, char** argv)
 {
+	Matrix4x4 matrix = *Matrix4x4::Identity();
+
+	std::cout << matrix.ToString() << std::endl;
+
+	Quaternion q1 = *new Quaternion(1, 1, 0, 0);
+	Quaternion q2 = *new Quaternion(0, 1, 1, 0);
+
+	Quaternion q3 = *(q1 * q2);
+
+	Quaternion q4 = *Quaternion::Euler(30, 60, 85);
+
+	matrix = *Matrix4x4::Rotate(q4);
+
+	std::cout << matrix.ToString() << std::endl;
+
+	std::cout << " ---- " << std::endl;
+
+	matrix = *Matrix4x4::Translate(*new Vector(20, -10, 66));
+
+	std::cout << matrix.ToString() << std::endl;
+
+	std::cout << " ---- " << std::endl;
+
+	Matrix4x4 scale = *Matrix4x4::Scale(*new Vector(2, 0.5, 6));
+
+	std::cout << matrix.ToString() << std::endl;
+
+	std::cout << "------------ TRS --------------- " << std::endl;
+
+	Matrix4x4* trs = Matrix4x4::TRS(*new Vector(-10, 20, 30), *Quaternion::Euler(30, -20, 50), *new Vector(0.5, 2, 0.8));
+	std::cout << trs->ToString() << std::endl;
+
 	glfwSetErrorCallback(glfw_error_callback);
 
 	glfwInit();
@@ -60,50 +93,7 @@ int main(int argc, char** argv)
 
 	const Shader& shader = Shader::Create("shaders/lit.vert", "shaders/lit.frag");
 
-
-
-	//std::vector<DrawDetails> ourDrawDetails;
-	//{
-	//	std::vector<Vertex> obj_pts;
-
-	//	Vertex v1;
-	//	v1.position = Vector(.5f, -.5f, 0.f);
-	//	obj_pts.push_back(v1);
-
-	//	Vertex v2;
-	//	v2.position = Vector(-.5f, -.5f, 0.f);
-	//	obj_pts.push_back(v2);
-
-	//	Vertex v3;
-	//	v3.position = Vector(0.f, .5f, 0.f);
-	//	obj_pts.push_back(v3);
-
-	//	std::vector<uint32_t> elem = { 0, 1, 2 };
-
-	//	UploadMesh(obj_pts, elem);
-	//};
-
-	//shader.Use();
-
 	ModelAsset& model = Assets::Load<ModelAsset>("models/Jayne.fbx");
-
-	//std::vector<Vertex> obj_pts;
-
-	//Vertex v1;
-	//v1.position = Vector(.5f, -.5f, 0.f);
-	//obj_pts.push_back(v1);
-
-	//Vertex v2;
-	//v2.position = Vector(-.5f, -.5f, 0.f);
-	//obj_pts.push_back(v2);
-
-	//Vertex v3;
-	//v3.position = Vector(0.f, .5f, 0.f);
-	//obj_pts.push_back(v3);
-
-	//std::vector<uint32_t> elem = { 0, 1, 2 };
-
-	//Mesh mesh(obj_pts, elem);
 
 
 	while (!glfwWindowShouldClose(window))
@@ -113,8 +103,6 @@ int main(int argc, char** argv)
 
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		//RENDER OUR OBJECT
-		//shader.SetColor("ucolor", Color(0, 0, 1, 1));
 		shader.Use();
 
 		for (int i = 0; i < model.Meshes().size(); i++)
@@ -122,22 +110,9 @@ int main(int argc, char** argv)
 			model.Meshes()[i]->Draw();
 		}
 
-		//glBindVertexArray(1);
-		//glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
-
-		////GLenum err;
-		////while ((err = glGetError()) != GL_NO_ERROR)
-		////{
-		////	std::cerr << "OpenGL error: " << err << std::endl;
-		////}
-		//glBindVertexArray(0);
-
-
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-
-	//UnloadMesh(ourDrawDetails);
 
 	glfwTerminate();
 

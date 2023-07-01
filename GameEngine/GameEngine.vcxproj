@@ -162,7 +162,9 @@
     <ClInclude Include="src\core\assets\ModelAsset.hpp" />
     <ClInclude Include="src\core\assets\TextAsset.hpp" />
     <ClInclude Include="src\core\Color.h" />
+    <ClInclude Include="src\core\Matrix4x4.hpp" />
     <ClInclude Include="src\core\Mesh.hpp" />
+    <ClInclude Include="src\core\Quaternion.hpp" />
     <ClInclude Include="src\core\shaders\Shader.h" />
     <ClInclude Include="src\core\Vector.h" />
     <ClInclude Include="src\core\Vector2.h" />

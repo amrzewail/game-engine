@@ -76,6 +76,12 @@
     <ClInclude Include="src\core\Vector2.h">
       <Filter>src\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\Matrix4x4.hpp">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\Quaternion.hpp">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Source.cpp">
