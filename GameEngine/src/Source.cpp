@@ -42,6 +42,7 @@
 #include "core/Camera.hpp"
 #include "core/Material.hpp"
 #include "core/MeshRenderer.hpp"
+#include "core/GameObject.hpp"
 
 
 
@@ -83,37 +84,35 @@ int main(int argc, char** argv)
 	TextureAsset& chainmailTex = Assets::Load<TextureAsset>("textures/CHAINMAIL_tex.jpg");
 	TextureAsset& scarfTex = Assets::Load<TextureAsset>("textures/CLOTH_tex.png");
 
+	TextureAsset& gridTex = Assets::Load<TextureAsset>("textures/checkerboard_tex.png");
 	TextureAsset& fabricTex = Assets::Load<TextureAsset>("textures/FABRIC_tex.png");
 
-	TextureAsset& gridTex = Assets::Load<TextureAsset>("textures/checkerboard_tex.png");
-
-	Material fabricMaterial = Material(shader, fabricTex.Tex());
-
-	Material gridMaterial = Material(shader, gridTex.Tex());
-
-	Assets::Unload(fabricTex.path);
-
-	ModelAsset& cube = Assets::Load<ModelAsset>("models/cube.obj");
+	Material fabricMaterial = Material(shader, fabricTex.GetTexture());
 
 	Camera& camera = *new Camera();
 	camera.aspect = 1280.0 / 720.0;
 
-	std::vector<MeshRenderer*> jayneMeshRenderers = std::vector<MeshRenderer*>();
+
+	GameObject& jayneGameObject = *new GameObject();
 	//jayne model loading and renderer
 	{
-		Material* eyeballMaterial = new Material(shader, faceTex.Tex());
-		Material* faceMaterial = new Material(shader, faceTex.Tex());
-		Material* bodyMaterial = new Material(shader, bodyTex.Tex());
-		Material* eyelashesMaterial = new Material(chainmailShader, faceTex.Tex());
-		Material* hairMaterial = new Material(shader, hairTex.Tex());
-		Material* hair2Material = new Material(shader, hairTex.Tex());
-		Material* underwearMaterial = new Material(shader, clothTex.Tex());
-		Material* clothMaterial = new Material(shader, clothTex.Tex());
-		Material* leatherMaterial = new Material(shader, leatherTex.Tex());
-		Material* goldMaterial = new Material(shader, goldTex.Tex());
-		Material* chainmailMaterial = new Material(chainmailShader, chainmailTex.Tex());
-		Material* scarfMaterial = new Material(shader, scarfTex.Tex());
-		Material* brownMaterial = new Material(shader, leatherTex.Tex());
+		Material* eyeballMaterial = new Material(shader, faceTex.GetTexture());
+		Material* faceMaterial = new Material(shader, faceTex.GetTexture());
+		Material* bodyMaterial = new Material(shader, bodyTex.GetTexture());
+		Material* eyelashesMaterial = new Material(chainmailShader, faceTex.GetTexture());
+		Material* hairMaterial = new Material(shader, hairTex.GetTexture());
+		Material* hair2Material = new Material(shader, hairTex.GetTexture());
+		Material* underwearMaterial = new Material(shader, clothTex.GetTexture());
+		Material* clothMaterial = new Material(shader, clothTex.GetTexture());
+		Material* leatherMaterial = new Material(shader, leatherTex.GetTexture());
+		Material* goldMaterial = new Material(shader, goldTex.GetTexture());
+		Material* chainmailMaterial = new Material(chainmailShader, chainmailTex.GetTexture());
+		Material* scarfMaterial = new Material(shader, scarfTex.GetTexture());
+		Material* brownMaterial = new Material(shader, leatherTex.GetTexture());
+
+		chainmailMaterial->enableTransparency = true;
+		hairMaterial->enableTransparency = true;
+		hair2Material->enableTransparency = false;
 
 		std::unordered_map<std::string, Material*> materialMap = std::unordered_map<std::string, Material*>();
 		materialMap["Eyeball"] = eyeballMaterial;
@@ -134,23 +133,24 @@ int main(int argc, char** argv)
 
 		for (int i = 0; i < jayneModel.Meshes().size(); i++)
 		{
-			MeshRenderer* renderer = new MeshRenderer();
-			renderer->mesh = jayneModel.Meshes()[i]->mesh;
-			renderer->materials.push_back(materialMap.at(*jayneModel.Meshes()[i]->materialName));
-
-			jayneMeshRenderers.push_back(renderer);
+			//MeshRenderer* r = new MeshRenderer();
+			//jayneGameObject.AddComponent(r);
+			MeshRenderer& renderer = jayneGameObject.AddComponent<MeshRenderer>();
+			renderer.mesh = jayneModel.Meshes()[i]->mesh;
+			renderer.materials->push_back(materialMap.at(*jayneModel.Meshes()[i]->materialName));
 		}
+	}
 
+	GameObject& floorGameObject = *new GameObject();
+	{// floor game object renderer
 
-		Assets::Unload(faceTex.path);
-		Assets::Unload(bodyTex.path);
-		Assets::Unload(faceTex.path);
-		Assets::Unload(hairTex.path);
-		Assets::Unload(clothTex.path);
-		Assets::Unload(leatherTex.path);
-		Assets::Unload(goldTex.path);
-		Assets::Unload(chainmailTex.path);
-		Assets::Unload(scarfTex.path);
+		ModelAsset& cube = Assets::Load<ModelAsset>("models/cube.obj");
+
+		Material* gridMaterial = new Material(shader, fabricTex.GetTexture());
+
+		MeshRenderer& renderer = floorGameObject.AddComponent<MeshRenderer>();
+		renderer.materials->push_back(gridMaterial);
+		renderer.mesh = cube.Meshes()[0]->mesh;
 	}
 
 
@@ -167,11 +167,10 @@ int main(int argc, char** argv)
 	const float targetFrameTime = 1.0 / targetFramerate;
 
 
-	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_DEPTH);
 	glEnable(GL_CULL_FACE);
-	glEnable(GL_BLEND);
-	glDepthFunc(GL_LEQUAL);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_ALPHA_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	while (!glfwWindowShouldClose(window))
@@ -184,12 +183,11 @@ int main(int argc, char** argv)
 		{
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
 			deltaTime = deltaTimeAccumulator;
 			deltaTimeAccumulator = 0;
 
-			camera.transform->position = Vector(0.01, 2, -2 + sin(rotY / 15) * 1);
-			camera.transform->rotation = *Quaternion::Euler(-30 + 0 * 40 * sin(rotY / 10), 0, 0);
+			camera.transform->position = new Vector(0.01, 2, -2 + sin(rotY / 15) * 1);
+			camera.transform->rotation = Quaternion::Euler(-30 + 0 * 40 * sin(rotY / 10), 0, 0);
 
 			rotY += 4 * deltaTime;
 
@@ -197,61 +195,44 @@ int main(int argc, char** argv)
 			glfwPollEvents();
 			ProcessInput(window);
 
+			camera.CalculateProjectionMatrix();
 
-			const Matrix4x4 PV = camera.ProjectionMatrix();
-
-			const Matrix4x4 cubeModel = *Matrix4x4::TRS(*new Vector(0, -0.1, 0), *Quaternion::Euler(0, 0, 0), *new Vector(2, 0.01, 2));
-			const Matrix4x4 jayneModel = *Matrix4x4::TRS(*new Vector(0, 0, 0), *Quaternion::Euler(270, rotY * 10, 0), *new Vector(1, 1, 1));
-
-			const Matrix4x4 cubeRightModel = *Matrix4x4::TRS(*new Vector(1, 0, 0), *Quaternion::Euler(0, 0, 0), *new Vector(0.05, 0.05, 0.05));
+			//const Matrix4x4 cubeRightModel = *Matrix4x4::TRS(*new Vector(1, 1, 0), *Quaternion::Euler(0, 0, 0), *new Vector(0.05, 0.05, 0.05));
 
 
 			{
-				fabricMaterial.Use();
-				fabricMaterial.Activate();
-
-				fabricMaterial.shader.SetMatrix4x4("model", cubeRightModel);
-				fabricMaterial.shader.SetMatrix4x4("PV", PV);
-
-				for (int i = 0; i < cube.Meshes().size(); i++)
-				{
-					cube.Meshes()[i]->mesh->Draw();
-				}
+				floorGameObject.transform->position->y = -0.1;
+				floorGameObject.transform->localScale = new Vector(2, 0.01, 2);
+				floorGameObject.Render(camera);
 			}
+
 
 			{
-				gridMaterial.Use();
-				gridMaterial.Activate();
-
-				gridMaterial.shader.SetMatrix4x4("model", cubeModel);
-				gridMaterial.shader.SetMatrix4x4("PV", PV);
-
-				for (int i = 0; i < cube.Meshes().size(); i++)
-				{
-					cube.Meshes()[i]->mesh->Draw();
-				}
+				jayneGameObject.transform->rotation = Quaternion::Euler(270, rotY * 10, 0);
+				jayneGameObject.Render(camera);
 			}
 
-			{
-				for (int i = 0; i < jayneMeshRenderers.size(); i++)
-				{
-					jayneMeshRenderers[i]->materials[0]->Use();
-					jayneMeshRenderers[i]->materials[0]->Activate();
 
-					jayneMeshRenderers[i]->materials[0]->shader.SetMatrix4x4("model", jayneModel);
-					jayneMeshRenderers[i]->materials[0]->shader.SetMatrix4x4("PV", PV);
-
-					jayneMeshRenderers[i]->Render();
-				}
-			}
-
-			glUseProgram(0);
+			glDisable(GL_BLEND);
 			glfwSwapBuffers(window);
-			glfwPollEvents();
 
-			std::cout << "average fps: " << 1.0f / deltaTime << " frame time: " << deltaTime << std::endl;
+			//std::cout << "average fps: " << 1.0f / deltaTime << " frame time: " << deltaTime << std::endl;
 		}
 	}
+
+
+	Assets::Unload(fabricTex.path);
+	Assets::Unload(gridTex.path);
+
+	Assets::Unload(faceTex.path);
+	Assets::Unload(bodyTex.path);
+	Assets::Unload(faceTex.path);
+	Assets::Unload(hairTex.path);
+	Assets::Unload(clothTex.path);
+	Assets::Unload(leatherTex.path);
+	Assets::Unload(goldTex.path);
+	Assets::Unload(chainmailTex.path);
+	Assets::Unload(scarfTex.path);
 
 	glfwDestroyWindow(window);
 	glfwTerminate();

@@ -149,6 +149,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\Component.cpp" />
+    <ClCompile Include="src\core\GameObject.cpp" />
+    <ClCompile Include="src\core\Material.cpp" />
     <ClCompile Include="src\core\Texture.hpp" />
     <ClCompile Include="src\libs\image.cpp" />
     <ClCompile Include="src\core\assets\Assets.cpp" />
@@ -158,9 +161,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Asset.h" />
+    <ClInclude Include="src\core\Component.hpp" />
+    <ClInclude Include="src\core\GameObject.hpp" />
     <ClInclude Include="src\core\Material.hpp" />
     <ClInclude Include="src\core\MeshContainer.hpp" />
     <ClInclude Include="src\core\MeshRenderer.hpp" />
+    <ClInclude Include="src\core\utils\Guid.hpp" />
     <ClInclude Include="src\libs\image.h" />
     <ClInclude Include="src\Callbacks.h" />
     <ClInclude Include="src\core\assets\Asset.h" />

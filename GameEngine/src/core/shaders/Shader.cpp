@@ -147,5 +147,6 @@ void Shader::SetMatrix4x4(const std::string& name, const Matrix4x4& m) const
 		std::cerr << "Couldn't find " << name << std::endl;
 		exit(1);
 	}
+
 	glUniformMatrix4fv(loc, 1, GL_FALSE, m.Data());
 }

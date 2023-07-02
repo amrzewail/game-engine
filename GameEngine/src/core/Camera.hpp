@@ -27,13 +27,17 @@ public:
 		delete _projection;
 	}
 
-
-	Matrix4x4 ProjectionMatrix()
+	void CalculateProjectionMatrix()
 	{
-		Matrix4x4 transformation = transform->LocalToWorldMatrix();
+		Matrix4x4* transformation = transform->LocalToWorldMatrix();
 		Matrix4x4 projection = *Matrix4x4::Perspective(fieldOfView, aspect, nearClipPlane, farClipPlane);
-		Matrix4x4 view = *Matrix4x4::Inverse(transformation);
+		Matrix4x4 view = *Matrix4x4::Inverse(*transformation);
 		_projection = projection * view;
-		return *_projection;
+	}
+
+
+	Matrix4x4* ProjectionMatrix() const
+	{
+		return _projection;
 	}
 };

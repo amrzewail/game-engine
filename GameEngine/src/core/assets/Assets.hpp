@@ -5,6 +5,7 @@
 #include <fstream>
 
 #include "Asset.h";
+#include <iostream>
 
 using std::allocator;
 
@@ -25,6 +26,8 @@ public:
 		if (!Exists(path)) return;
 		Asset* asset = _loadedAssets[path];
 		delete asset;
+
+		std::cout << "Unloaded Asset: " << path << std::endl;
 	}
 
 	template<typename T>
@@ -48,6 +51,8 @@ public:
 		infile.read(bytes, length);
 
 		infile.close();
+
+		std::cout << "Loaded Asset: " << path << std::endl;
 
 		T* asset = new T(path);
 		asset->Deserialize(bytes, length);

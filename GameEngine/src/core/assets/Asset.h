@@ -12,6 +12,11 @@ public:
 
 	}
 
+	virtual ~Asset()
+	{
+
+	}
+
 	virtual void Deserialize(char* bytes, size_t length) = 0;
 
 };

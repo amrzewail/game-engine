@@ -2,7 +2,6 @@
 
 #include "Asset.h"
 
-#include "../../libs/image.h"
 #include "../Texture.hpp"
 
 
@@ -20,23 +19,17 @@ public:
 
 	~TextureAsset()
 	{
-		stbi_image_free(_texture->Data());
 		delete _texture;
 	}
 
 	void Deserialize(char* bytes, size_t length)
 	{
-		int width, height, nrComponents;
-
-		stbi_set_flip_vertically_on_load(false);
-		unsigned char* data = stbi_load_from_memory((unsigned char*)bytes, length, &width, &height, &nrComponents, 0);
-
-		_texture = new Texture(data, width, height, nrComponents);
+		_texture = new Texture(bytes, length);
 	}
 
-	Texture& Tex()
+	Texture* GetTexture()
 	{
-		return *_texture;
+		return _texture;
 	}
 
 };

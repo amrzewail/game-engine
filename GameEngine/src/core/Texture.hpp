@@ -1,5 +1,7 @@
 #pragma once
 #include <glad/glad.h>
+#include "../libs/image.h"
+#include <iostream>
 
 struct Texture
 {
@@ -9,10 +11,10 @@ private:
 	int _channels;
 	unsigned char* _data;
 	int _textureUnit = 0;
+	bool _isReady = false;
 
 public:
-
-	int locationId = 0;
+	GLuint* bindId;
 
 	int Width() const
 	{
@@ -45,18 +47,57 @@ public:
 	{
 		_data = 0;
 		_width = _height = _channels = 0;
+		bindId = new GLuint();
 	}
 
-	Texture(unsigned char* data, int width, int height, int channels)
+	Texture(char* bytes, int length) : Texture()
 	{
-		_data = data;
+		int width, height, channels;
+
+		stbi_set_flip_vertically_on_load(false);
+		_data = stbi_load_from_memory((unsigned char*)bytes, length, &width, &height, &channels, 0);
 		_width = width;
 		_height = height;
 		_channels = channels;
 	}
 
+
 	~Texture()
 	{
-		//delete[] _data;
+		if (!IsReadyToUse()) return;
+
+		std::cout << "Unloaded texture from gpu memory: " << *bindId << std::endl;
+
+		glDeleteTextures(1, bindId);
+		delete bindId;
+	}
+
+	void Bind()
+	{
+		if (_isReady) return;
+
+		glGenTextures(1, bindId);
+
+		glBindTexture(GL_TEXTURE_2D, *bindId);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, InternalFormat(),Width(), Height(), 0, InternalFormat(), GL_UNSIGNED_BYTE, Data());
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		stbi_image_free(_data);
+
+		std::cout << "Loaded texture to gpu memory: " << *bindId << std::endl;
+
+		_isReady = true;
+	}
+
+	bool IsReadyToUse()
+	{
+		return _isReady;
 	}
 };
