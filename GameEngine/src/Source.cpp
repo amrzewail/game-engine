@@ -43,6 +43,8 @@
 #include "core/Material.hpp"
 #include "core/MeshRenderer.hpp"
 #include "core/GameObject.hpp"
+#include "core/lights/DirectionalLight.hpp"
+#include "core/rendering/Renderers.hpp"
 
 
 
@@ -60,6 +62,8 @@ int main(int argc, char** argv)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 
+	glfwWindowHint(GLFW_SAMPLES, 4);
+
 	GLFWwindow* window = glfwCreateWindow(1280, 720, ExtractVersion(argv[0]), nullptr, nullptr);
 
 	glfwMakeContextCurrent(window);
@@ -73,7 +77,7 @@ int main(int argc, char** argv)
 	glClearColor(.2f, .2f, .6f, 0.f);
 
 	const Shader& shader = Shader::Create("shaders/lit.vert", "shaders/lit.frag");
-	const Shader& chainmailShader = Shader::Create("shaders/lit.vert", "shaders/chainmail.frag");
+	const Shader& transparentShader = Shader::Create("shaders/lit.vert", "shaders/lit_transparent.frag");
 
 	TextureAsset& faceTex = Assets::Load<TextureAsset>("textures/FACE_tex.png");
 	TextureAsset& bodyTex = Assets::Load<TextureAsset>("textures/BODY_tex.png");
@@ -99,20 +103,26 @@ int main(int argc, char** argv)
 		Material* eyeballMaterial = new Material(shader, faceTex.GetTexture());
 		Material* faceMaterial = new Material(shader, faceTex.GetTexture());
 		Material* bodyMaterial = new Material(shader, bodyTex.GetTexture());
-		Material* eyelashesMaterial = new Material(chainmailShader, faceTex.GetTexture());
+		Material* eyelashesMaterial = new Material(transparentShader, faceTex.GetTexture());
 		Material* hairMaterial = new Material(shader, hairTex.GetTexture());
 		Material* hair2Material = new Material(shader, hairTex.GetTexture());
 		Material* underwearMaterial = new Material(shader, clothTex.GetTexture());
 		Material* clothMaterial = new Material(shader, clothTex.GetTexture());
 		Material* leatherMaterial = new Material(shader, leatherTex.GetTexture());
 		Material* goldMaterial = new Material(shader, goldTex.GetTexture());
-		Material* chainmailMaterial = new Material(chainmailShader, chainmailTex.GetTexture());
+		Material* chainmailMaterial = new Material(transparentShader, chainmailTex.GetTexture());
 		Material* scarfMaterial = new Material(shader, scarfTex.GetTexture());
 		Material* brownMaterial = new Material(shader, leatherTex.GetTexture());
 
 		chainmailMaterial->enableTransparency = true;
 		hairMaterial->enableTransparency = true;
-		hair2Material->enableTransparency = false;
+		hair2Material->enableTransparency = true;
+		eyelashesMaterial->enableTransparency = true;
+
+		chainmailMaterial->isTwoSided = true;
+		hairMaterial->isTwoSided = true;
+		hair2Material->isTwoSided = true;
+		scarfMaterial->isTwoSided = true;
 
 		std::unordered_map<std::string, Material*> materialMap = std::unordered_map<std::string, Material*>();
 		materialMap["Eyeball"] = eyeballMaterial;
@@ -137,7 +147,7 @@ int main(int argc, char** argv)
 			//jayneGameObject.AddComponent(r);
 			MeshRenderer& renderer = jayneGameObject.AddComponent<MeshRenderer>();
 			renderer.mesh = jayneModel.Meshes()[i]->mesh;
-			renderer.materials->push_back(materialMap.at(*jayneModel.Meshes()[i]->materialName));
+			renderer.material = materialMap.at(*jayneModel.Meshes()[i]->materialName);
 		}
 	}
 
@@ -149,10 +159,26 @@ int main(int argc, char** argv)
 		Material* gridMaterial = new Material(shader, fabricTex.GetTexture());
 
 		MeshRenderer& renderer = floorGameObject.AddComponent<MeshRenderer>();
-		renderer.materials->push_back(gridMaterial);
+		renderer.material = gridMaterial;
 		renderer.mesh = cube.Meshes()[0]->mesh;
 	}
 
+	//GameObject& floorGameObject2 = *new GameObject();
+	//{// floor game object renderer
+
+	//	ModelAsset& cube = Assets::Load<ModelAsset>("models/cube.obj");
+
+	//	Material* gridMaterial = new Material(shader, fabricTex.GetTexture());
+
+	//	MeshRenderer& renderer = floorGameObject2.AddComponent<MeshRenderer>();
+	//	renderer.material = gridMaterial;
+	//	renderer.mesh = cube.Meshes()[0]->mesh;
+	//}
+
+	DirectionalLight* directionalLight = new DirectionalLight();
+	directionalLight->intensity = 1;
+	directionalLight->direction = new Vector(0, -1, -1);
+	directionalLight->color = new Color(1, 1, 1, 1);
 
 	float rotY = 0;
 
@@ -172,6 +198,7 @@ int main(int argc, char** argv)
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_ALPHA_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_MULTISAMPLE);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -186,8 +213,8 @@ int main(int argc, char** argv)
 			deltaTime = deltaTimeAccumulator;
 			deltaTimeAccumulator = 0;
 
-			camera.transform->position = new Vector(0.01, 2, -2 + sin(rotY / 15) * 1);
-			camera.transform->rotation = Quaternion::Euler(-30 + 0 * 40 * sin(rotY / 10), 0, 0);
+			camera.transform->position = new Vector(0.01, 1.6, -1);
+			camera.transform->rotation = Quaternion::Euler(-10, 0, 0);
 
 			rotY += 4 * deltaTime;
 
@@ -197,28 +224,32 @@ int main(int argc, char** argv)
 
 			camera.CalculateProjectionMatrix();
 
-			//const Matrix4x4 cubeRightModel = *Matrix4x4::TRS(*new Vector(1, 1, 0), *Quaternion::Euler(0, 0, 0), *new Vector(0.05, 0.05, 0.05));
-
-
 			{
 				floorGameObject.transform->position->y = -0.1;
 				floorGameObject.transform->localScale = new Vector(2, 0.01, 2);
-				floorGameObject.Render(camera);
 			}
 
 
 			{
 				jayneGameObject.transform->rotation = Quaternion::Euler(270, rotY * 10, 0);
-				jayneGameObject.Render(camera);
 			}
 
 
-			glDisable(GL_BLEND);
+			for (auto* renderer : Renderers::GetRenderers())
+			{
+				renderer->Render(camera);
+
+				glDisable(GL_BLEND);
+				glEnable(GL_CULL_FACE);
+			}
+
 			glfwSwapBuffers(window);
 
 			//std::cout << "average fps: " << 1.0f / deltaTime << " frame time: " << deltaTime << std::endl;
 		}
 	}
+
+	delete &jayneGameObject;
 
 
 	Assets::Unload(fabricTex.path);

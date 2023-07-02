@@ -11,6 +11,7 @@ private:
 public:
 
 	bool enableTransparency = false;
+	bool isTwoSided = false;
 
 	const Shader& shader;
 

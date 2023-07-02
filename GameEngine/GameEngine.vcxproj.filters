@@ -115,6 +115,24 @@
     <ClInclude Include="src\core\utils\Guid.hpp">
       <Filter>src\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\lights\Light.hpp">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\lights\Lights.h">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\lights\LightType.h">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\lights\DirectionalLight.hpp">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\rendering\Renderer.hpp">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\rendering\Renderers.hpp">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Source.cpp">
@@ -128,11 +146,15 @@
     <ClCompile Include="src\core\GameObject.cpp" />
     <ClCompile Include="src\core\Component.cpp" />
     <ClCompile Include="src\core\Material.cpp" />
+    <ClCompile Include="src\core\lights\Light.cpp" />
+    <ClCompile Include="src\core\lights\Lights.cpp" />
+    <ClCompile Include="src\core\rendering\Renderers.cpp" />
+    <ClCompile Include="src\core\rendering\Renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\lit.frag" />
     <None Include="assets\shaders\lit.vert" />
     <None Include="C:\Programming\Project Painter\Assets\Models\Jayne\Jayne.fbx" />
-    <None Include="assets\shaders\chainmail.frag" />
+    <None Include="assets\shaders\lit_transparent.frag" />
   </ItemGroup>
 </Project>

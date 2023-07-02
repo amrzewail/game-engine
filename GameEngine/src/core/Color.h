@@ -23,4 +23,9 @@ public:
 		this->a = a;
 	}
 
+	Color operator *(float value)
+	{
+		return Color(r * value, g * value, b * value, a * value);
+	}
+
 };

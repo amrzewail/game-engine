@@ -149,8 +149,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\rendering\Renderer.cpp" />
+    <ClCompile Include="src\core\rendering\Renderers.cpp" />
     <ClCompile Include="src\core\Component.cpp" />
     <ClCompile Include="src\core\GameObject.cpp" />
+    <ClCompile Include="src\core\lights\Light.cpp" />
+    <ClCompile Include="src\core\lights\Lights.cpp" />
     <ClCompile Include="src\core\Material.cpp" />
     <ClCompile Include="src\core\Texture.hpp" />
     <ClCompile Include="src\libs\image.cpp" />
@@ -161,11 +165,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Asset.h" />
+    <ClInclude Include="src\core\rendering\Renderers.hpp" />
     <ClInclude Include="src\core\Component.hpp" />
     <ClInclude Include="src\core\GameObject.hpp" />
+    <ClInclude Include="src\core\lights\DirectionalLight.hpp" />
+    <ClInclude Include="src\core\lights\Light.hpp" />
+    <ClInclude Include="src\core\lights\Lights.h" />
+    <ClInclude Include="src\core\lights\LightType.h" />
     <ClInclude Include="src\core\Material.hpp" />
     <ClInclude Include="src\core\MeshContainer.hpp" />
     <ClInclude Include="src\core\MeshRenderer.hpp" />
+    <ClInclude Include="src\core\rendering\Renderer.hpp" />
     <ClInclude Include="src\core\utils\Guid.hpp" />
     <ClInclude Include="src\libs\image.h" />
     <ClInclude Include="src\Callbacks.h" />
@@ -194,7 +204,7 @@
     <ClInclude Include="src\DrawDetails.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\shaders\chainmail.frag" />
+    <None Include="assets\shaders\lit_transparent.frag" />
     <None Include="assets\shaders\lit.frag" />
     <None Include="assets\shaders\lit.vert" />
     <None Include="C:\Programming\Project Painter\Assets\Models\Jayne\Jayne.fbx" />

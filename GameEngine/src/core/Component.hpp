@@ -15,7 +15,7 @@ public:
 
 	Component();
 
-	~Component();
+	virtual ~Component();
 
 	virtual void Awake();
 

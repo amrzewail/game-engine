@@ -24,10 +24,6 @@ public:
 	void AddComponent(Component* component);
 
 
-
-	void Render(Camera& camera) const;
-
-
 	template <typename T>
 	T& AddComponent()
 	{

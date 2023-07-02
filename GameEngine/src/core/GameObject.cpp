@@ -25,11 +25,3 @@ void GameObject::AddComponent(Component* component)
 	component->gameObject = this;
 	component->Awake();
 }
-
-void GameObject::Render(Camera& camera) const
-{
-	for (auto& pair : *_components)
-	{
-		pair.second->Render(camera);
-	}
-}

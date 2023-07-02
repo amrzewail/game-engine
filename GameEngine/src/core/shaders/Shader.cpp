@@ -79,7 +79,7 @@ void Shader::SetBool(const std::string& name, bool value) const
 	if (loc < 0)
 	{
 		std::cerr << "Couldn't find " << name << std::endl;
-		exit(1);
+		return;
 	}
 	glUniform1i(loc, (int)value);
 }
@@ -90,7 +90,7 @@ void Shader::SetInt(const std::string& name, int value) const
 	if (loc < 0)
 	{
 		std::cerr << "Couldn't find " << name << std::endl;
-		exit(1);
+		return;
 	}
 	glUniform1i(loc, value);
 }
@@ -101,7 +101,7 @@ void Shader::SetFloat(const std::string& name, float value) const
 	if (loc < 0)
 	{
 		std::cerr << "Couldn't find " << name << std::endl;
-		exit(1);
+		return;
 	}
 	glUniform1f(loc, value);
 }
@@ -112,7 +112,7 @@ void Shader::SetVector(const std::string& name, float x, float y, float z) const
 	if (loc < 0)
 	{
 		std::cerr << "Couldn't find " << name << std::endl;
-		exit(1);
+		return;
 	}
 	glUniform3f(loc, x, y, z);
 }
@@ -123,7 +123,7 @@ void Shader::SetVector(const std::string& name, const Vector& v) const
 	if (loc < 0)
 	{
 		std::cerr << "Couldn't find " << name << std::endl;
-		exit(1);
+		return;
 	}
 	glUniform3f(loc, v.x, v.y, v.z);
 }
@@ -134,7 +134,7 @@ void Shader::SetColor(const std::string& name, const Color& c) const
 	if (loc < 0)
 	{
 		std::cerr << "Couldn't find " << name << std::endl;
-		exit(1);
+		return;
 	}
 	glUniform4f(loc, c.r, c.g, c.b, c.a);
 }
@@ -145,7 +145,7 @@ void Shader::SetMatrix4x4(const std::string& name, const Matrix4x4& m) const
 	if (loc < 0)
 	{
 		std::cerr << "Couldn't find " << name << std::endl;
-		exit(1);
+		return;
 	}
 
 	glUniformMatrix4fv(loc, 1, GL_FALSE, m.Data());
