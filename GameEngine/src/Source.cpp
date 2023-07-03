@@ -46,11 +46,14 @@
 #include "core/lights/DirectionalLight.hpp"
 #include "core/rendering/Renderers.hpp"
 #include "core/assets/ShaderAsset.hpp"
-
-
+#include "core/Screen.h"
+#include "core/rendering/IRenderPass.hpp"
+#include "core/rendering/SceneRenderPass.h"
+#include "core/rendering/BloomRenderPass.hpp"
 
 float deltaTime = 0.0f;
 float lastTimeMs = 0.0f;
+
 
 int main(int argc, char** argv)
 {
@@ -62,8 +65,9 @@ int main(int argc, char** argv)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 
 	glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-	GLFWwindow* window = glfwCreateWindow(1280, 720, ExtractVersion(argv[0]), nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(Screen::WIDTH, Screen::HEIGHT, ExtractVersion(argv[0]), nullptr, nullptr);
 
 	glfwMakeContextCurrent(window);
 
@@ -73,10 +77,37 @@ int main(int argc, char** argv)
 
 	glfwSetFramebufferSizeCallback(window, glfw_framebuffer_size_callback);
 
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	const float moreObnoxiousQuad[] = {
+	-1.0f, -1.0f, -0.9f, 0.0f, 0.0f,
+	1.0f, -1.0f, -0.9f, 1.0f, 0.0f,
+	1.0f, 1.0f, -0.9f, 1.0f, 1.0f,
+	-1.0f, -1.0f, -0.9f, 0.0f, 0.0f,
+	1.0f, 1.0f, -0.9f, 1.0f, 1.0f,
+	-1.0f, 1.0f, -0.9f, 0.0f, 1.0f
+	};
+
+	unsigned int moreObnoxiousQuadVAO;
+	glGenVertexArrays(1, &moreObnoxiousQuadVAO);
+	unsigned int moreObnoxiousQuadVBO;
+	glGenBuffers(1, &moreObnoxiousQuadVBO);
+	glBindVertexArray(moreObnoxiousQuadVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, moreObnoxiousQuadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(moreObnoxiousQuad), moreObnoxiousQuad, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+	const Shader& screenShader = *Assets::Load<ShaderAsset>("shaders/screen.shader").GetShader();
+
+	const Shader& hairShader = *Assets::Load<ShaderAsset>("shaders/hair.shader").GetShader();
 	const Shader& lit = *Assets::Load<ShaderAsset>("shaders/lit.shader").GetShader();
 	const Shader& litClip = *Assets::Load<ShaderAsset>("shaders/lit_clip.shader").GetShader();
 	const Shader& litTransparent = *Assets::Load<ShaderAsset>("shaders/lit_transparent.shader").GetShader();
 	const Shader& eyeShader = *Assets::Load<ShaderAsset>("shaders/eye.shader").GetShader();
+	const Shader& faceShader = *Assets::Load<ShaderAsset>("shaders/face.shader").GetShader();
 
 	TextureAsset& faceTex = Assets::Load<TextureAsset>("textures/FACE_tex.png");
 	TextureAsset& bodyTex = Assets::Load<TextureAsset>("textures/BODY_tex.png");
@@ -98,7 +129,7 @@ int main(int argc, char** argv)
 
 
 	Camera& camera = *new Camera();
-	camera.aspect = 1280.0 / 720.0;
+	camera.aspect = float(Screen::WIDTH) / Screen::HEIGHT;
 
 	GameObject& jayneGameObject = *new GameObject();
 	//jayne model loading and renderer
@@ -106,11 +137,11 @@ int main(int argc, char** argv)
 		std::vector<Material*> jayneMaterials = std::vector<Material*>();
 
 		jayneMaterials.push_back(new Material("Eyeball", eyeShader, faceTex.GetTexture()));
-		jayneMaterials.push_back(new Material("Face", lit, faceTex.GetTexture()));
+		jayneMaterials.push_back(new Material("Face", faceShader, faceTex.GetTexture()));
 		jayneMaterials.push_back(new Material("Body", lit, bodyTex.GetTexture()));
 		jayneMaterials.push_back(new Material("Eyelashes", litClip, faceTex.GetTexture()));
-		jayneMaterials.push_back(new Material("Hair", litTransparent, hairTex.GetTexture()));
-		jayneMaterials.push_back(new Material("Hair2", litClip, hairTex.GetTexture()));
+		jayneMaterials.push_back(new Material("Hair", hairShader, hairTex.GetTexture()));
+		jayneMaterials.push_back(new Material("Hair2", hairShader, hairTex.GetTexture()));
 		jayneMaterials.push_back(new Material("Underwear", lit, clothTex.GetTexture()));
 		jayneMaterials.push_back(new Material("Cloth", lit, clothTex.GetTexture()));
 		jayneMaterials.push_back(new Material("Leather", lit, leatherTex.GetTexture()));
@@ -122,6 +153,8 @@ int main(int argc, char** argv)
 
 		for (int i = 0; i < jayneModel.Meshes().size(); i++)
 		{
+			//if (*jayneModel.Meshes()[i]->materialName != "Eyeball") continue;
+
 			MeshRenderer& renderer = jayneGameObject.AddComponent<MeshRenderer>();
 			renderer.mesh = jayneModel.Meshes()[i]->mesh;
 			for (auto* material : jayneMaterials)
@@ -149,9 +182,9 @@ int main(int argc, char** argv)
 
 
 	DirectionalLight* directionalLight = new DirectionalLight();
-	directionalLight->intensity = 1;
+	directionalLight->intensity = 1.5;
 	directionalLight->direction = new Vector(0, -1, -1);
-	directionalLight->color = new Color(1, 1, 1, 1);
+	directionalLight->color = new Color(1, 0.8, 0.8, 1);
 
 	float rotY = 0;
 
@@ -166,12 +199,21 @@ int main(int argc, char** argv)
 	const float targetFrameTime = 1.0 / targetFramerate;
 
 
-	glEnable(GL_TEXTURE_DEPTH);
-	glEnable(GL_CULL_FACE);
-	glClearColor(0, 0, 0, 0);
+	IRenderPass* sceneRenderPass = new SceneRenderPass();
+	IRenderPass* bloomRenderPass = new BloomRenderPass(*sceneRenderPass);
 
-	//glEnable(GL_ALPHA_TEST);
-	//glEnable(GL_MULTISAMPLE);
+	IRenderPass* renderPasses[2] = { sceneRenderPass, bloomRenderPass };
+
+	int index = 0;
+	for (auto* pass : renderPasses)
+	{
+		pass->Initialize(index++);
+	}
+
+	*camera.transform->position = Vector(0, 1.4, -2);
+	*camera.transform->rotation = Quaternion::Euler(0, 0, 0);
+
+	double lastMouseX = 0, lastMouseY = 0;
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -181,40 +223,112 @@ int main(int argc, char** argv)
 
 		while (deltaTimeAccumulator >= targetFrameTime)
 		{
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			//glDisable(GL_BLEND);
-
-			deltaTime = deltaTimeAccumulator;
-			deltaTimeAccumulator = 0;
-
-			camera.transform->position = new Vector(0.01, 1.6, -0.5);
-			camera.transform->rotation = Quaternion::Euler(-10, 0, 0);
-
-			rotY += 4 * deltaTime;
-
-
-			glfwPollEvents();
-			ProcessInput(window);
-
-			camera.CalculateProjectionMatrix();
-
+			//update
 			{
-				floorGameObject.transform->position->y = -0.1;
-				floorGameObject.transform->localScale = new Vector(2, 0.01, 2);
+				deltaTime = deltaTimeAccumulator;
+				deltaTimeAccumulator = 0;
+
+
+
+				rotY += 4 * deltaTime;
+
+				*directionalLight->direction = Vector(-0.7, -1, 1);
+
+				camera.CalculateProjectionMatrix();
+
+				//inputs
+				{
+					float cameraSpeed = 2;
+
+					if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+					{
+						*camera.transform->position += camera.transform->Right() * cameraSpeed * deltaTime;
+					}
+
+					if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+					{
+						*camera.transform->position += -camera.transform->Right() * cameraSpeed * deltaTime;
+					}
+
+					if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+					{
+						*camera.transform->position += camera.transform->Forward() * cameraSpeed * deltaTime;
+					}
+
+					if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+					{
+						*camera.transform->position += -camera.transform->Forward() * cameraSpeed * deltaTime;
+					}
+
+					if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+					{
+						camera.transform->position->y += cameraSpeed * deltaTime;
+					}
+
+					if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+					{
+						camera.transform->position->y -= cameraSpeed * deltaTime;
+					}
+
+					double mouseX, mouseY;
+					glfwGetCursorPos(window, &mouseX, &mouseY);
+
+					Vector cameraEuler = camera.transform->EulerAngles();
+
+					cameraEuler.y -= (mouseX - lastMouseX) * deltaTime;
+					cameraEuler.x -= (mouseY - lastMouseY) * deltaTime;
+					cameraEuler.z = 0;
+
+					lastMouseX = mouseX;
+					lastMouseY = mouseY;
+
+					*camera.transform->rotation = cameraEuler;
+
+					std::cout << "Camera Position: " << camera.transform->position->ToString() << std::endl;
+
+					ProcessInput(window);
+
+				}
+
+				{
+					floorGameObject.transform->position->y = -0.1;
+					floorGameObject.transform->localScale = new Vector(2, 0.01, 2);
+				}
+
+
+				{
+					*jayneGameObject.transform->position = Vector(0, 0, 0);
+					*jayneGameObject.transform->rotation = Quaternion::Euler(270, 0, 0);
+				}
 			}
 
-
+			//rendering
 			{
-				jayneGameObject.transform->rotation = Quaternion::Euler(270, 0 * rotY * 10, 0);
-			}
+				IRenderPass* lastPass = renderPasses[0];
+				for (auto* pass : renderPasses)
+				{
+					lastPass = pass;
+					pass->Render(camera);
+				}
 
 
-			for (auto* renderer : Renderers::GetRenderers())
-			{
-				renderer->Render(camera);
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+				glClearColor(0, 0, 0, 0);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				glDisable(GL_DEPTH_TEST);
+
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, lastPass->textureBuffer);
+
+				screenShader.Use();
+				screenShader.SetInt("screenTexture", 0);
+
+				glBindVertexArray(moreObnoxiousQuadVAO);
+				glDrawArrays(GL_TRIANGLES, 0, 6);
 			}
 
 			glfwSwapBuffers(window);
+			glfwPollEvents();
 
 			//std::cout << "average fps: " << 1.0f / deltaTime << " frame time: " << deltaTime << std::endl;
 		}

@@ -39,8 +39,8 @@ private:
 
 			if (line.empty() || line == "\n" || line == " " || line == "\0") continue;
 
-			if (CheckKeyword(line, "#include")) line = Include(line);
-			if (CheckKeyword(line, "#version")) continue;
+			if (Token(line, "#include")) line = Include(line);
+			if (Token(line, "#version")) continue;
 
 			output += line + '\n';
 		}
@@ -53,7 +53,7 @@ private:
 		return Trim(Trim(defineLine, "#define"), " ");
 	}
 
-	static bool CheckKeyword(std::string line, std::string keyword)
+	static bool Token(std::string line, std::string keyword)
 	{
 		if (line.size() >= keyword.size() && line.substr(0, keyword.size()) == keyword)
 		{
@@ -86,28 +86,28 @@ public:
 
 			std::cout << line.size() << ">>" << line << std::endl;
 
-			if (CheckKeyword(line, "#define"))
+			if (Token(line, "#define"))
 			{
 				defines.push_back(Define(line));
 				continue;
 			}
 
-			if (CheckKeyword(line, "vert"))
+			if (Token(line, "vert"))
 			{
 				beginVert = true;
 				continue;
 			}
 
-			if (CheckKeyword(line, "frag"))
+			if (Token(line, "frag"))
 			{
 				beginFrag = true;
 				continue;
 			}
 
 
-			if (line == "{") openBraceCount++;
+			if (Token(line, "{")) openBraceCount++;
 
-			if (line == "}")
+			if (Token(line, "}"))
 			{
 				openBraceCount--;
 
@@ -118,12 +118,12 @@ public:
 				}
 			}
 
-			if (CheckKeyword(line, "#include"))
+			if (Token(line, "#include"))
 			{
 				line = Include(line);
 			}
 
-			if (line == "{" && openBraceCount == 1) continue;
+			if (Token(line, "{") && openBraceCount == 1) continue;
 
 			if (beginVert)
 			{
@@ -137,8 +137,15 @@ public:
 
 		}
 
-		std::cout << vertShader << std::endl;
-		std::cout << fragShader << std::endl;
+		int lineIndex = 0;
+
+		iss = std::istringstream(vertShader);
+		lineIndex = 0;
+		for (std::string line; std::getline(iss, line); ) std::cout << lineIndex++ << ">>" << line << std::endl;
+
+		iss = std::istringstream(fragShader);
+		lineIndex = 0;
+		for (std::string line; std::getline(iss, line); ) std::cout << lineIndex++ << ">>" << line << std::endl;
 
 		Shader* shader = Shader::Create(vertShader.c_str(), fragShader.c_str());
 		for (auto d : defines)

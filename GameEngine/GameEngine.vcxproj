@@ -169,6 +169,7 @@
     <ClInclude Include="src\core\input\InputActionType.h" />
     <ClInclude Include="src\core\input\InputAction.hpp" />
     <ClInclude Include="src\core\input\InputKey.h" />
+    <ClInclude Include="src\core\rendering\BloomRenderPass.hpp" />
     <ClInclude Include="src\core\rendering\Renderers.hpp" />
     <ClInclude Include="src\core\Component.hpp" />
     <ClInclude Include="src\core\GameObject.hpp" />
@@ -180,6 +181,9 @@
     <ClInclude Include="src\core\MeshContainer.hpp" />
     <ClInclude Include="src\core\MeshRenderer.hpp" />
     <ClInclude Include="src\core\rendering\Renderer.hpp" />
+    <ClInclude Include="src\core\rendering\IRenderPass.hpp" />
+    <ClInclude Include="src\core\rendering\SceneRenderPass.h" />
+    <ClInclude Include="src\core\Screen.h" />
     <ClInclude Include="src\core\shaders\ShaderCompiler.hpp" />
     <ClInclude Include="src\core\utils\Guid.hpp" />
     <ClInclude Include="src\libs\image.h" />
@@ -212,9 +216,15 @@
     <None Include="assets\shaders\core.frag" />
     <None Include="assets\shaders\core.vert" />
     <None Include="assets\shaders\eye.shader" />
+    <None Include="assets\shaders\face.shader" />
+    <None Include="assets\shaders\gaussian_blur.frag" />
+    <None Include="assets\shaders\hair.shader" />
     <None Include="assets\shaders\lit.shader" />
     <None Include="assets\shaders\lit_clip.shader" />
     <None Include="assets\shaders\lit_transparent.shader" />
+    <None Include="assets\shaders\noise.frag" />
+    <None Include="assets\shaders\screen.shader" />
+    <None Include="assets\shaders\ss_bloom.shader" />
     <None Include="C:\Programming\Project Painter\Assets\Models\Jayne\Jayne.fbx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

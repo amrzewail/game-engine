@@ -148,6 +148,18 @@
     <ClInclude Include="src\core\shaders\ShaderCompiler.hpp">
       <Filter>src\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\rendering\IRenderPass.hpp">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\rendering\SceneRenderPass.h">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\Screen.h">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\rendering\BloomRenderPass.hpp">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Source.cpp">
@@ -174,5 +186,11 @@
     <None Include="assets\shaders\lit_clip.shader" />
     <None Include="assets\shaders\lit_transparent.shader" />
     <None Include="assets\shaders\eye.shader" />
+    <None Include="assets\shaders\noise.frag" />
+    <None Include="assets\shaders\face.shader" />
+    <None Include="assets\shaders\gaussian_blur.frag" />
+    <None Include="assets\shaders\ss_bloom.shader" />
+    <None Include="assets\shaders\screen.shader" />
+    <None Include="assets\shaders\hair.shader" />
   </ItemGroup>
 </Project>

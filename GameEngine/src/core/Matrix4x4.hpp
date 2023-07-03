@@ -143,4 +143,14 @@ public:
 
 	}
 
+
+	Vector* operator* (Vector& rhs)
+	{
+		Vector* result = new Vector();
+		result->x = At(0, 0) * rhs.x + At(0, 1) * rhs.y + At(0, 2) * rhs.z;
+		result->y = At(1, 0) * rhs.x + At(1, 1) * rhs.y + At(1, 2) * rhs.z;
+		result->z = At(2, 0) * rhs.x + At(2, 1) * rhs.y + At(2, 2) * rhs.z;
+		return result;
+	}
+
 };

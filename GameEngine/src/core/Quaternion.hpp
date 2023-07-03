@@ -10,6 +10,7 @@ struct Quaternion
 {
 private:
 	fquat* _quaternion;
+	Vector* _eulerAngles;
 
 public:
 
@@ -19,52 +20,75 @@ public:
 	}
 
 	// roll (x), pitch (Y), yaw (z)
-	static Quaternion* Euler(float x, float y, float z)
+	static Quaternion Euler(float x, float y, float z)
 	{
 		x = glm::radians(x);
 		y = glm::radians(y);
 		z = glm::radians(z);
-		/*
-		float cosTheta1 = cos(x * 0.5);
-		float sinTheta1 = sin(x * 0.5);
-		float cosTheta2 = cos(y * 0.5);
-		float sinTheta2 = sin(y * 0.5);
-		float cosTheta3 = cos(z * 0.5);
-		float sinTheta3 = sin(z * 0.5);
-
-		float w = -sinTheta1 * sinTheta2 * sinTheta3 + cosTheta1 * cosTheta2 * cosTheta3;
-		y = -sinTheta1 * cosTheta2 * sinTheta3 + cosTheta1 * sinTheta2 * cosTheta3;
-		z = sinTheta1 * sinTheta2 * cosTheta3 + cosTheta1 * cosTheta2 * sinTheta3;
-		x = sinTheta1 * cosTheta2 * cosTheta3 + cosTheta1 * sinTheta2 * sinTheta3;*/
-
 		glm::fquat q = glm::fquat(glm::vec3(z, x, y));
-
-		Quaternion* quaternion = new Quaternion(q.w, q.y, q.z, q.x);
-
-		quaternion->Normalize();
-
+		Quaternion quaternion = Quaternion(q.w, q.y, q.z, q.x);
+		quaternion.Normalize();
 		return quaternion;
 	}
 
 	Quaternion()
 	{
 		_quaternion = new fquat(1, 0, 0, 0);
+		EulerAngles();
+
 	}
 
 	Quaternion(float w, float x, float y, float z)
 	{
 		_quaternion = new fquat(w, x, y, z);
+		EulerAngles();
 	}
 
 	~Quaternion()
 	{
 		delete _quaternion;
+		delete _eulerAngles;
 	}
 
-	float X() { return _quaternion->x; }
-	float Y() { return _quaternion->y; }
-	float Z() { return _quaternion->z; }
-	float W() { return _quaternion->w; }
+	Quaternion(const Quaternion& source)
+	{
+		_quaternion = new fquat(source.W(), source.X(), source.Y(), source.Z());
+		EulerAngles();
+	}
+
+
+	Quaternion& operator=(const Quaternion& rhs)
+	{
+		if (this != &rhs)
+		{
+			delete _quaternion;
+			delete _eulerAngles;
+			_quaternion = new fquat(rhs.W(), rhs.X(), rhs.Y(), rhs.Z());
+			EulerAngles();
+		}
+		return *this;
+	}
+
+	Quaternion& operator=(const Vector& euler)
+	{
+		delete _eulerAngles;
+		float x = glm::radians(euler.x);
+		float y = glm::radians(euler.y);
+		float z = glm::radians(euler.z);
+		fquat quat = glm::fquat(glm::vec3(z, x, y));
+		_quaternion->w = quat.w;
+		_quaternion->x = quat.y;
+		_quaternion->y = quat.z;
+		_quaternion->z = quat.x;
+		Normalize();
+		EulerAngles();
+		return *this;
+	}
+
+	float X() const { return _quaternion->x; }
+	float Y() const { return _quaternion->y; }
+	float Z() const { return _quaternion->z; }
+	float W() const { return _quaternion->w; }
 
 	void Set(float w, float x, float y, float z)
 	{
@@ -74,7 +98,7 @@ public:
 		_quaternion->z = z;
 	}
 
-	Vector* EulerAngles()
+	Vector& EulerAngles()
 	{
 		glm::vec3 euler = glm::eulerAngles(fquat(W(), Z(), X(), Y()));
 		euler.x = glm::degrees(euler.x);
@@ -84,7 +108,8 @@ public:
 		euler.x = euler.x < 0 ? euler.x + 360 : euler.x;
 		euler.y = euler.y < 0 ? euler.y + 360 : euler.y;
 		euler.z = euler.z < 0 ? euler.z + 360 : euler.z;
-		return new Vector(euler.y, euler.z, euler.x);
+		_eulerAngles = new Vector(euler.y, euler.z, euler.x);
+		return *_eulerAngles;
 	}
 
 	std::string ToString()
@@ -104,11 +129,18 @@ public:
 		return new Quaternion(W() / d, X() / d, Y() / d, Z() / d);
 	}
 
-	Quaternion* operator *(Quaternion& rhs) const
+	friend Quaternion operator *(Quaternion lhs, Quaternion& rhs)
 	{
 		fquat rhsQ = fquat(rhs.W(), rhs.X(), rhs.Y(), rhs.Z());
-		rhsQ = (* _quaternion) * rhsQ;
-		return new Quaternion(rhsQ.w, rhsQ.x, rhsQ.y, rhsQ.z);
+		rhsQ = *lhs._quaternion * rhsQ;
+		lhs.Set(rhsQ.w, rhsQ.x, rhsQ.y, rhsQ.z);
+	}
+
+	friend Vector operator *(const Quaternion lhs, const Vector& rhs)
+	{
+		vec3 result =  fquat(lhs.W(), -lhs.X(), -lhs.Y(), lhs.Z()) * vec3(rhs.x, rhs.y, rhs.z);
+		Vector vector = Vector(result.x, result.y, result.z);
+		return vector;
 	}
 
 };
