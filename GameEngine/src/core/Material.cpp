@@ -5,19 +5,19 @@ Material::~Material()
 
 }
 
-Material::Material(const Shader& shader) : shader(shader)
+Material::Material(const std::string name, const Shader& shader) : name(name), shader(shader)
 {
 	_textures = new std::vector<Texture*>();
 }
 
-Material::Material(const Shader& shader, Texture* tex0) : Material(shader)
+Material::Material(const std::string name, const Shader& shader, Texture* tex0) : Material(name, shader)
 {
 	_textures->push_back(tex0);
 
 	LoadTextures();
 }
 
-Material::Material(const Shader& shader, Texture* tex0, Texture* tex1) : Material(shader)
+Material::Material(const std::string name, const Shader& shader, Texture* tex0, Texture* tex1) : Material(name, shader)
 {
 	_textures->push_back(tex0);
 	_textures->push_back(tex1);
@@ -25,7 +25,7 @@ Material::Material(const Shader& shader, Texture* tex0, Texture* tex1) : Materia
 	LoadTextures();
 }
 
-Material::Material(const Shader& shader, Texture* tex0, Texture* tex1, Texture* tex2) : Material(shader)
+Material::Material(const std::string name, const Shader& shader, Texture* tex0, Texture* tex1, Texture* tex2) : Material(name, shader)
 {
 	_textures->push_back(tex0);
 	_textures->push_back(tex1);

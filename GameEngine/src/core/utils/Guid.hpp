@@ -31,6 +31,12 @@ public:
 
 	std::string ToString() const
 	{
+		if (!_c_str || _c_str == nullptr) return "";
 		return _c_str;
+	}
+
+	std::string* ToStringPtr() const
+	{
+		return new std::string(_c_str);
 	}
 };

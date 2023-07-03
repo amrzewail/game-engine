@@ -13,8 +13,8 @@ public:
 
 	float fieldOfView = 60;
 	float aspect = 800.0 / 600.0;
-	float nearClipPlane = 0.3f;
-	float farClipPlane = 100000.0f;
+	float nearClipPlane = 0.1f;
+	float farClipPlane = 1000.0f;
 
 	Camera()
 	{

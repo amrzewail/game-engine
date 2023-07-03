@@ -35,13 +35,24 @@ public:
 
 		auto& lights = Lights::GetLights();
 		
-		if (material->enableTransparency)
+		if (material->shader.IsDefined(Shader::FLAG_TRANSPARENT))
 		{
-			*priority = 1;
-			glEnable(GL_BLEND);
+			*priority = 10;
 		}
 
-		if (material->isTwoSided)
+		if (material->shader.IsDefined(Shader::FLAG_DEPTH_TEST_OFF))
+		{
+			glDisable(GL_DEPTH_TEST);
+			glDepthMask(false);
+		}
+
+		if (material->shader.IsDefined(Shader::FLAG_Blend_SrcAlpha_OneMinusSrcAlpha))
+		{
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		}
+
+		if (material->isTwoSided || material->shader.IsDefined(Shader::FLAG_CULL_FACE_OFF))
 		{
 			glDisable(GL_CULL_FACE);
 		}
@@ -71,6 +82,8 @@ public:
 
 		mesh->Draw();
 
+		glEnable(GL_CULL_FACE);
+		glEnable(GL_DEPTH_TEST);
 		glDisable(GL_BLEND);
 	}
 };

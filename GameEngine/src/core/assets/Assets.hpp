@@ -1,45 +1,87 @@
 #pragma once
 
+
+#include <bitset>
+#include <functional>
 #include <memory>
 #include <unordered_map>
 #include <fstream>
-
-#include "Asset.h";
 #include <iostream>
 
+#include "Asset.h";
+
 using std::allocator;
+
+using namespace std;
 
 class Assets
 {
 private:
-	static std::unordered_map<const char*, Asset*> _loadedAssets;
+	static std::vector<size_t> _loadedHashPaths;
+	static std::vector<Asset*> _loadedAssets;
 
-	static bool Exists(const char* path)
+	static bool ExistsByHash(size_t hash, int* index)
 	{
-		return _loadedAssets.find(path) != _loadedAssets.end();
+		*index = 0;
+		for (auto s : _loadedHashPaths)
+		{
+			if (s == hash) return true;
+			*index = *index + 1;
+		}
+		return false;
+	}
+
+	static bool ExistsByGuid(string guid, int* index)
+	{
+		*index = 0;
+		for (auto a : _loadedAssets)
+		{
+			if (*a->guid == guid) return true;
+			*index = *index + 1;
+		}
+		return false;
 	}
 
 public:
 
-	static void Unload(const char* path)
+	static void UnloadAll()
 	{
-		if (!Exists(path)) return;
-		Asset* asset = _loadedAssets[path];
-		delete asset;
+		while (_loadedAssets.size() > 0)
+		{
+			Unload(*_loadedAssets[0]);
+		}
+	}
 
-		std::cout << "Unloaded Asset: " << path << std::endl;
+	static void Unload(Asset& asset)
+	{
+		const string* guid = asset.guid;
+		int assetIndex;
+		if (!ExistsByGuid(*guid, &assetIndex)) return;
+		delete _loadedAssets[assetIndex];
+		_loadedAssets.erase(_loadedAssets.begin() + assetIndex);
+		_loadedHashPaths.erase(_loadedHashPaths.begin() + assetIndex);
+		std::cout << "Unloaded Asset: " << guid << std::endl;
 	}
 
 	template<typename T>
 	static T& Load(const char* path)
 	{
-		if (Exists(path))
+		string pathStr = string(path);
+
+
+		std::hash<string> myhash;
+		size_t pathHash = myhash(pathStr);
+
+		int assetIndex;
+
+		if (ExistsByHash(pathHash, &assetIndex))
 		{
-			T* asset = static_cast<T*>(_loadedAssets[path]);
+			T* asset = static_cast<T*>(_loadedAssets[assetIndex]);
 			return *asset;
 		}
 
-		std::ifstream infile("assets/" + std::string(path), std::ios_base::binary);
+		std::ifstream infile("assets/" + pathStr, std::ios_base::binary);
+
 
 		infile.seekg(0, std::ios::end);
 		size_t length = infile.tellg();
@@ -52,15 +94,19 @@ public:
 
 		infile.close();
 
-		std::cout << "Loaded Asset: " << path << std::endl;
 
 		T* asset = new T(path);
 		asset->Deserialize(bytes, length);
 
-		_loadedAssets[path] = asset;
+		std::string guid = *asset->guid;
+
+		std::cout << "Loaded Asset: " << path << " guid: " << guid << std::endl;
+
+		_loadedAssets.push_back(asset);
+		_loadedHashPaths.push_back(pathHash);
 
 		alloc.deallocate(bytes, length);
-
+		
 		return *asset;
-	};
+	}
 };

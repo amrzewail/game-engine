@@ -45,6 +45,7 @@
 #include "core/GameObject.hpp"
 #include "core/lights/DirectionalLight.hpp"
 #include "core/rendering/Renderers.hpp"
+#include "core/assets/ShaderAsset.hpp"
 
 
 
@@ -53,8 +54,6 @@ float lastTimeMs = 0.0f;
 
 int main(int argc, char** argv)
 {
-
-
 	glfwSetErrorCallback(glfw_error_callback);
 
 	glfwInit();
@@ -74,10 +73,10 @@ int main(int argc, char** argv)
 
 	glfwSetFramebufferSizeCallback(window, glfw_framebuffer_size_callback);
 
-	glClearColor(.2f, .2f, .6f, 0.f);
-
-	const Shader& shader = Shader::Create("shaders/lit.vert", "shaders/lit.frag");
-	const Shader& transparentShader = Shader::Create("shaders/lit.vert", "shaders/lit_transparent.frag");
+	const Shader& lit = *Assets::Load<ShaderAsset>("shaders/lit.shader").GetShader();
+	const Shader& litClip = *Assets::Load<ShaderAsset>("shaders/lit_clip.shader").GetShader();
+	const Shader& litTransparent = *Assets::Load<ShaderAsset>("shaders/lit_transparent.shader").GetShader();
+	const Shader& eyeShader = *Assets::Load<ShaderAsset>("shaders/eye.shader").GetShader();
 
 	TextureAsset& faceTex = Assets::Load<TextureAsset>("textures/FACE_tex.png");
 	TextureAsset& bodyTex = Assets::Load<TextureAsset>("textures/BODY_tex.png");
@@ -91,89 +90,63 @@ int main(int argc, char** argv)
 	TextureAsset& gridTex = Assets::Load<TextureAsset>("textures/checkerboard_tex.png");
 	TextureAsset& fabricTex = Assets::Load<TextureAsset>("textures/FABRIC_tex.png");
 
-	Material fabricMaterial = Material(shader, fabricTex.GetTexture());
+	Material fabricMaterial = Material("Fabric", lit, fabricTex.GetTexture());
+
+	ModelAsset& jayneModel = Assets::Load<ModelAsset>("models/Jayne.fbx");
+
+	ModelAsset& cube = Assets::Load<ModelAsset>("models/cube.obj");
+
 
 	Camera& camera = *new Camera();
 	camera.aspect = 1280.0 / 720.0;
 
-
 	GameObject& jayneGameObject = *new GameObject();
 	//jayne model loading and renderer
 	{
-		Material* eyeballMaterial = new Material(shader, faceTex.GetTexture());
-		Material* faceMaterial = new Material(shader, faceTex.GetTexture());
-		Material* bodyMaterial = new Material(shader, bodyTex.GetTexture());
-		Material* eyelashesMaterial = new Material(transparentShader, faceTex.GetTexture());
-		Material* hairMaterial = new Material(shader, hairTex.GetTexture());
-		Material* hair2Material = new Material(shader, hairTex.GetTexture());
-		Material* underwearMaterial = new Material(shader, clothTex.GetTexture());
-		Material* clothMaterial = new Material(shader, clothTex.GetTexture());
-		Material* leatherMaterial = new Material(shader, leatherTex.GetTexture());
-		Material* goldMaterial = new Material(shader, goldTex.GetTexture());
-		Material* chainmailMaterial = new Material(transparentShader, chainmailTex.GetTexture());
-		Material* scarfMaterial = new Material(shader, scarfTex.GetTexture());
-		Material* brownMaterial = new Material(shader, leatherTex.GetTexture());
+		std::vector<Material*> jayneMaterials = std::vector<Material*>();
 
-		chainmailMaterial->enableTransparency = true;
-		hairMaterial->enableTransparency = true;
-		hair2Material->enableTransparency = true;
-		eyelashesMaterial->enableTransparency = true;
+		jayneMaterials.push_back(new Material("Eyeball", eyeShader, faceTex.GetTexture()));
+		jayneMaterials.push_back(new Material("Face", lit, faceTex.GetTexture()));
+		jayneMaterials.push_back(new Material("Body", lit, bodyTex.GetTexture()));
+		jayneMaterials.push_back(new Material("Eyelashes", litClip, faceTex.GetTexture()));
+		jayneMaterials.push_back(new Material("Hair", litTransparent, hairTex.GetTexture()));
+		jayneMaterials.push_back(new Material("Hair2", litClip, hairTex.GetTexture()));
+		jayneMaterials.push_back(new Material("Underwear", lit, clothTex.GetTexture()));
+		jayneMaterials.push_back(new Material("Cloth", lit, clothTex.GetTexture()));
+		jayneMaterials.push_back(new Material("Leather", lit, leatherTex.GetTexture()));
+		jayneMaterials.push_back(new Material("Gold", lit, goldTex.GetTexture()));
+		jayneMaterials.push_back(new Material("Chainmail", litClip, chainmailTex.GetTexture()));
+		jayneMaterials.push_back(new Material("Scarf", lit, scarfTex.GetTexture()));
+		jayneMaterials.push_back(new Material("Brown", lit, leatherTex.GetTexture()));
 
-		chainmailMaterial->isTwoSided = true;
-		hairMaterial->isTwoSided = true;
-		hair2Material->isTwoSided = true;
-		scarfMaterial->isTwoSided = true;
-
-		std::unordered_map<std::string, Material*> materialMap = std::unordered_map<std::string, Material*>();
-		materialMap["Eyeball"] = eyeballMaterial;
-		materialMap["Face"] = faceMaterial;
-		materialMap["Body"] = bodyMaterial;
-		materialMap["Eyelashes"] = eyelashesMaterial;
-		materialMap["Hair"] = hairMaterial;
-		materialMap["Hair2"] = hair2Material;
-		materialMap["Underwear"] = underwearMaterial;
-		materialMap["Cloth"] = clothMaterial;
-		materialMap["Leather"] = leatherMaterial;
-		materialMap["Gold"] = goldMaterial;
-		materialMap["Chainmail"] = chainmailMaterial;
-		materialMap["Scarf"] = scarfMaterial;
-		materialMap["Brown"] = brownMaterial;
-
-		ModelAsset& jayneModel = Assets::Load<ModelAsset>("models/Jayne.fbx");
 
 		for (int i = 0; i < jayneModel.Meshes().size(); i++)
 		{
-			//MeshRenderer* r = new MeshRenderer();
-			//jayneGameObject.AddComponent(r);
 			MeshRenderer& renderer = jayneGameObject.AddComponent<MeshRenderer>();
 			renderer.mesh = jayneModel.Meshes()[i]->mesh;
-			renderer.material = materialMap.at(*jayneModel.Meshes()[i]->materialName);
+			for (auto* material : jayneMaterials)
+			{
+				if (material->name == *jayneModel.Meshes()[i]->materialName)
+				{
+					renderer.material = material;
+					break;
+				}
+			}
 		}
 	}
+
 
 	GameObject& floorGameObject = *new GameObject();
 	{// floor game object renderer
 
-		ModelAsset& cube = Assets::Load<ModelAsset>("models/cube.obj");
 
-		Material* gridMaterial = new Material(shader, fabricTex.GetTexture());
+		Material* gridMaterial = new Material("Grid", lit, fabricTex.GetTexture());
 
 		MeshRenderer& renderer = floorGameObject.AddComponent<MeshRenderer>();
 		renderer.material = gridMaterial;
 		renderer.mesh = cube.Meshes()[0]->mesh;
 	}
 
-	//GameObject& floorGameObject2 = *new GameObject();
-	//{// floor game object renderer
-
-	//	ModelAsset& cube = Assets::Load<ModelAsset>("models/cube.obj");
-
-	//	Material* gridMaterial = new Material(shader, fabricTex.GetTexture());
-
-	//	MeshRenderer& renderer = floorGameObject2.AddComponent<MeshRenderer>();
-	//	renderer.material = gridMaterial;
-	//	renderer.mesh = cube.Meshes()[0]->mesh;
-	//}
 
 	DirectionalLight* directionalLight = new DirectionalLight();
 	directionalLight->intensity = 1;
@@ -195,10 +168,10 @@ int main(int argc, char** argv)
 
 	glEnable(GL_TEXTURE_DEPTH);
 	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_ALPHA_TEST);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_MULTISAMPLE);
+	glClearColor(0, 0, 0, 0);
+
+	//glEnable(GL_ALPHA_TEST);
+	//glEnable(GL_MULTISAMPLE);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -209,11 +182,12 @@ int main(int argc, char** argv)
 		while (deltaTimeAccumulator >= targetFrameTime)
 		{
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			//glDisable(GL_BLEND);
 
 			deltaTime = deltaTimeAccumulator;
 			deltaTimeAccumulator = 0;
 
-			camera.transform->position = new Vector(0.01, 1.6, -1);
+			camera.transform->position = new Vector(0.01, 1.6, -0.5);
 			camera.transform->rotation = Quaternion::Euler(-10, 0, 0);
 
 			rotY += 4 * deltaTime;
@@ -231,16 +205,13 @@ int main(int argc, char** argv)
 
 
 			{
-				jayneGameObject.transform->rotation = Quaternion::Euler(270, rotY * 10, 0);
+				jayneGameObject.transform->rotation = Quaternion::Euler(270, 0 * rotY * 10, 0);
 			}
 
 
 			for (auto* renderer : Renderers::GetRenderers())
 			{
 				renderer->Render(camera);
-
-				glDisable(GL_BLEND);
-				glEnable(GL_CULL_FACE);
 			}
 
 			glfwSwapBuffers(window);
@@ -249,21 +220,11 @@ int main(int argc, char** argv)
 		}
 	}
 
-	delete &jayneGameObject;
 
+	delete& jayneGameObject;
 
-	Assets::Unload(fabricTex.path);
-	Assets::Unload(gridTex.path);
+	Assets::UnloadAll();
 
-	Assets::Unload(faceTex.path);
-	Assets::Unload(bodyTex.path);
-	Assets::Unload(faceTex.path);
-	Assets::Unload(hairTex.path);
-	Assets::Unload(clothTex.path);
-	Assets::Unload(leatherTex.path);
-	Assets::Unload(goldTex.path);
-	Assets::Unload(chainmailTex.path);
-	Assets::Unload(scarfTex.path);
 
 	glfwDestroyWindow(window);
 	glfwTerminate();

@@ -128,7 +128,6 @@ public:
 
 	~ModelAsset()
 	{
-		delete _scene;
 		for (int i = 0; i < _meshes.size(); ++i)
 		{
 			delete _meshes[i];
@@ -149,6 +148,8 @@ public:
 
 		ProcessNode(_scene->mRootNode);
 
+
+		importer.FreeScene();
 	}
 
 };

@@ -36,13 +36,17 @@ namespace
 
 } // namespace
 
-Shader Shader::Create(const char* vertPath, const char* fragPath)
-{
-	TextAsset& vertTxt = Assets::Load<TextAsset>(vertPath);
-	TextAsset& fragTxt = Assets::Load<TextAsset>(fragPath);
 
-	const char* vShaderCode = vertTxt.GetChars();
-	const char* fShaderCode = fragTxt.GetChars();
+const string Shader::FLAG_TRANSPARENT = "TRANSPARENT";
+const string Shader::FLAG_Blend_SrcAlpha_OneMinusSrcAlpha = "Blend_SrcAlpha_OneMinusSrcAlpha";
+const string Shader::FLAG_DEPTH_TEST_OFF = "DEPTH_TEST_OFF";
+const string Shader::FLAG_CULL_FACE_OFF = "CULL_FACE_OFF";
+
+
+Shader* Shader::Create(const char* vertShader, const char* fragShader)
+{
+	const char* vShaderCode = vertShader;
+	const char* fShaderCode = fragShader;
 
 	const unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertexShader, 1, &vShaderCode, NULL);
@@ -68,7 +72,12 @@ Shader Shader::Create(const char* vertPath, const char* fragPath)
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
-	return Shader(shaderProgram);
+	return new Shader(shaderProgram);
+}
+
+Shader::~Shader()
+{
+	delete _defines;
 }
 
 void Shader::Use() const { glUseProgram(id); }

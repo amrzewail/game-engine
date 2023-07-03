@@ -165,6 +165,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Asset.h" />
+    <ClInclude Include="src\core\assets\ShaderAsset.hpp" />
+    <ClInclude Include="src\core\input\InputActionType.h" />
+    <ClInclude Include="src\core\input\InputAction.hpp" />
+    <ClInclude Include="src\core\input\InputKey.h" />
     <ClInclude Include="src\core\rendering\Renderers.hpp" />
     <ClInclude Include="src\core\Component.hpp" />
     <ClInclude Include="src\core\GameObject.hpp" />
@@ -176,6 +180,7 @@
     <ClInclude Include="src\core\MeshContainer.hpp" />
     <ClInclude Include="src\core\MeshRenderer.hpp" />
     <ClInclude Include="src\core\rendering\Renderer.hpp" />
+    <ClInclude Include="src\core\shaders\ShaderCompiler.hpp" />
     <ClInclude Include="src\core\utils\Guid.hpp" />
     <ClInclude Include="src\libs\image.h" />
     <ClInclude Include="src\Callbacks.h" />
@@ -204,9 +209,12 @@
     <ClInclude Include="src\DrawDetails.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\shaders\lit_transparent.frag" />
-    <None Include="assets\shaders\lit.frag" />
-    <None Include="assets\shaders\lit.vert" />
+    <None Include="assets\shaders\core.frag" />
+    <None Include="assets\shaders\core.vert" />
+    <None Include="assets\shaders\eye.shader" />
+    <None Include="assets\shaders\lit.shader" />
+    <None Include="assets\shaders\lit_clip.shader" />
+    <None Include="assets\shaders\lit_transparent.shader" />
     <None Include="C:\Programming\Project Painter\Assets\Models\Jayne\Jayne.fbx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
