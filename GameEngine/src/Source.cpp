@@ -50,6 +50,8 @@
 #include "core/rendering/IRenderPass.hpp"
 #include "core/rendering/SceneRenderPass.h"
 #include "core/rendering/BloomRenderPass.hpp"
+#include "core/rendering/FXAARenderPass.h"
+#include "core/Quad.hpp"
 
 float deltaTime = 0.0f;
 float lastTimeMs = 0.0f;
@@ -64,7 +66,7 @@ int main(int argc, char** argv)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 
-	glfwWindowHint(GLFW_SAMPLES, 4);
+	//glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 	GLFWwindow* window = glfwCreateWindow(Screen::WIDTH, Screen::HEIGHT, ExtractVersion(argv[0]), nullptr, nullptr);
@@ -79,26 +81,7 @@ int main(int argc, char** argv)
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	const float moreObnoxiousQuad[] = {
-	-1.0f, -1.0f, -0.9f, 0.0f, 0.0f,
-	1.0f, -1.0f, -0.9f, 1.0f, 0.0f,
-	1.0f, 1.0f, -0.9f, 1.0f, 1.0f,
-	-1.0f, -1.0f, -0.9f, 0.0f, 0.0f,
-	1.0f, 1.0f, -0.9f, 1.0f, 1.0f,
-	-1.0f, 1.0f, -0.9f, 0.0f, 1.0f
-	};
-
-	unsigned int moreObnoxiousQuadVAO;
-	glGenVertexArrays(1, &moreObnoxiousQuadVAO);
-	unsigned int moreObnoxiousQuadVBO;
-	glGenBuffers(1, &moreObnoxiousQuadVBO);
-	glBindVertexArray(moreObnoxiousQuadVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, moreObnoxiousQuadVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(moreObnoxiousQuad), moreObnoxiousQuad, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
+	Quad::Initialize();
 
 	const Shader& screenShader = *Assets::Load<ShaderAsset>("shaders/screen.shader").GetShader();
 
@@ -109,21 +92,15 @@ int main(int argc, char** argv)
 	const Shader& eyeShader = *Assets::Load<ShaderAsset>("shaders/eye.shader").GetShader();
 	const Shader& faceShader = *Assets::Load<ShaderAsset>("shaders/face.shader").GetShader();
 
-	TextureAsset& faceTex = Assets::Load<TextureAsset>("textures/FACE_tex.png");
-	TextureAsset& bodyTex = Assets::Load<TextureAsset>("textures/BODY_tex.png");
-	TextureAsset& hairTex = Assets::Load<TextureAsset>("textures/HAIR_tex.png");
-	TextureAsset& clothTex = Assets::Load<TextureAsset>("textures/CLOTH_tex.png");
-	TextureAsset& leatherTex = Assets::Load<TextureAsset>("textures/Leather_tex.png");
-	TextureAsset& goldTex = Assets::Load<TextureAsset>("textures/CLOTH_tex.png");
-	TextureAsset& chainmailTex = Assets::Load<TextureAsset>("textures/CHAINMAIL_tex.jpg");
-	TextureAsset& scarfTex = Assets::Load<TextureAsset>("textures/CLOTH_tex.png");
-
 	TextureAsset& gridTex = Assets::Load<TextureAsset>("textures/checkerboard_tex.png");
 	TextureAsset& fabricTex = Assets::Load<TextureAsset>("textures/FABRIC_tex.png");
 
 	Material fabricMaterial = Material("Fabric", lit, fabricTex.GetTexture());
+	Material gridMaterial = Material("Grid", lit, gridTex.GetTexture());
 
 	ModelAsset& jayneModel = Assets::Load<ModelAsset>("models/Jayne.fbx");
+
+	ModelAsset& xbotModel = Assets::Load<ModelAsset>("models/xbot.fbx");
 
 	ModelAsset& cube = Assets::Load<ModelAsset>("models/cube.obj");
 
@@ -134,13 +111,26 @@ int main(int argc, char** argv)
 	GameObject& jayneGameObject = *new GameObject();
 	//jayne model loading and renderer
 	{
+
+		TextureAsset& faceTex = Assets::Load<TextureAsset>("textures/FACE_tex.png");
+		TextureAsset& bodyTex = Assets::Load<TextureAsset>("textures/BODY_tex.png");
+		TextureAsset& hairTex = Assets::Load<TextureAsset>("textures/HAIR_tex.png");
+		TextureAsset& clothTex = Assets::Load<TextureAsset>("textures/CLOTH_tex.png");
+		TextureAsset& leatherTex = Assets::Load<TextureAsset>("textures/Leather_tex.png");
+		TextureAsset& goldTex = Assets::Load<TextureAsset>("textures/CLOTH_tex.png");
+		TextureAsset& chainmailTex = Assets::Load<TextureAsset>("textures/CHAINMAIL_tex.jpg");
+		TextureAsset& scarfTex = Assets::Load<TextureAsset>("textures/CLOTH_tex.png");
+
 		std::vector<Material*> jayneMaterials = std::vector<Material*>();
+
+		Material& hairMaterial = *new Material("Hair", hairShader, hairTex.GetTexture());
+		hairMaterial.SetColor("ucolor", Color(0.6, 0, 0, 1));
 
 		jayneMaterials.push_back(new Material("Eyeball", eyeShader, faceTex.GetTexture()));
 		jayneMaterials.push_back(new Material("Face", faceShader, faceTex.GetTexture()));
 		jayneMaterials.push_back(new Material("Body", lit, bodyTex.GetTexture()));
 		jayneMaterials.push_back(new Material("Eyelashes", litClip, faceTex.GetTexture()));
-		jayneMaterials.push_back(new Material("Hair", hairShader, hairTex.GetTexture()));
+		jayneMaterials.push_back(&hairMaterial);
 		jayneMaterials.push_back(new Material("Hair2", hairShader, hairTex.GetTexture()));
 		jayneMaterials.push_back(new Material("Underwear", lit, clothTex.GetTexture()));
 		jayneMaterials.push_back(new Material("Cloth", lit, clothTex.GetTexture()));
@@ -165,6 +155,28 @@ int main(int argc, char** argv)
 					break;
 				}
 			}
+		}
+	}
+
+	GameObject& xbotGameObject = *new GameObject();
+	{
+		*xbotGameObject.transform->position = Vector(0, 0, 5);
+		*xbotGameObject.transform->localScale = Vector(0.01, 0.01, 0.01);
+		for (int i = 0; i < xbotModel.Meshes().size(); i++)
+		{
+			//if (*jayneModel.Meshes()[i]->materialName != "Eyeball") continue;
+
+			MeshRenderer& renderer = xbotGameObject.AddComponent<MeshRenderer>();
+			renderer.mesh = xbotModel.Meshes()[i]->mesh;
+			renderer.material = &gridMaterial;
+			//for (auto* material : jayneMaterials)
+			//{
+			//	if (material->name == *jayneModel.Meshes()[i]->materialName)
+			//	{
+			//		renderer.material = material;
+			//		break;
+			//	}
+			//}
 		}
 	}
 
@@ -200,9 +212,13 @@ int main(int argc, char** argv)
 
 
 	IRenderPass* sceneRenderPass = new SceneRenderPass();
-	IRenderPass* bloomRenderPass = new BloomRenderPass(*sceneRenderPass);
+	IRenderPass* bloomRenderPass = new BloomRenderPass();
+	IRenderPass* fxaaRenderPass = new FXAARenderPass();
 
-	IRenderPass* renderPasses[2] = { sceneRenderPass, bloomRenderPass };
+	std::vector<IRenderPass*> renderPasses; 
+	renderPasses.push_back(sceneRenderPass);
+	renderPasses.push_back(bloomRenderPass);
+	renderPasses.push_back(fxaaRenderPass);
 
 	int index = 0;
 	for (auto* pass : renderPasses)
@@ -210,10 +226,15 @@ int main(int argc, char** argv)
 		pass->Initialize(index++);
 	}
 
-	*camera.transform->position = Vector(0, 1.4, -2);
-	*camera.transform->rotation = Quaternion::Euler(0, 0, 0);
+	*camera.transform->position = Vector(0.15, 1.6, -0.3);
+	*camera.transform->rotation = Quaternion::Euler(-10, 30, 0);
 
 	double lastMouseX = 0, lastMouseY = 0;
+
+	//glEnable(GL_MULTISAMPLE);
+	//glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+	//glEnable(GL_SAMPLE_ALPHA_TO_ONE);
+	//glEnable(GL_SAMPLE_COVERAGE);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -232,7 +253,7 @@ int main(int argc, char** argv)
 
 				rotY += 4 * deltaTime;
 
-				*directionalLight->direction = Vector(-0.7, -1, 1);
+				*directionalLight->direction = Vector(-0.6, -0.6, 1);
 
 				camera.CalculateProjectionMatrix();
 
@@ -284,7 +305,7 @@ int main(int argc, char** argv)
 
 					*camera.transform->rotation = cameraEuler;
 
-					std::cout << "Camera Position: " << camera.transform->position->ToString() << std::endl;
+					//std::cout << "Camera Position: " << camera.transform->position->ToString() << std::endl;
 
 					ProcessInput(window);
 
@@ -307,14 +328,14 @@ int main(int argc, char** argv)
 				IRenderPass* lastPass = renderPasses[0];
 				for (auto* pass : renderPasses)
 				{
+					pass->Render(*lastPass, camera);
 					lastPass = pass;
-					pass->Render(camera);
 				}
 
 
 				glBindFramebuffer(GL_FRAMEBUFFER, 0);
 				glClearColor(0, 0, 0, 0);
-				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				glClear(GL_COLOR_BUFFER_BIT);
 				glDisable(GL_DEPTH_TEST);
 
 				glActiveTexture(GL_TEXTURE0);
@@ -323,8 +344,7 @@ int main(int argc, char** argv)
 				screenShader.Use();
 				screenShader.SetInt("screenTexture", 0);
 
-				glBindVertexArray(moreObnoxiousQuadVAO);
-				glDrawArrays(GL_TRIANGLES, 0, 6);
+				Quad::Render();
 			}
 
 			glfwSwapBuffers(window);

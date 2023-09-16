@@ -160,6 +160,15 @@
     <ClInclude Include="src\core\rendering\BloomRenderPass.hpp">
       <Filter>src\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\rendering\FXAARenderPass.h">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\Quad.hpp">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\animation\VertexBone.hpp">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Source.cpp">
@@ -177,6 +186,7 @@
     <ClCompile Include="src\core\lights\Lights.cpp" />
     <ClCompile Include="src\core\rendering\Renderers.cpp" />
     <ClCompile Include="src\core\rendering\Renderer.cpp" />
+    <ClCompile Include="src\core\Quad.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="C:\Programming\Project Painter\Assets\Models\Jayne\Jayne.fbx" />
@@ -192,5 +202,7 @@
     <None Include="assets\shaders\ss_bloom.shader" />
     <None Include="assets\shaders\screen.shader" />
     <None Include="assets\shaders\hair.shader" />
+    <None Include="assets\shaders\ss_fxaa.shader" />
+    <None Include="assets\shaders\fxaa.frag" />
   </ItemGroup>
 </Project>

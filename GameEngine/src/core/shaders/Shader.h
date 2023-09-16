@@ -42,7 +42,6 @@ public:
 	void SetBool(const std::string& name, bool value) const;
 	void SetInt(const std::string& name, int value) const;
 	void SetFloat(const std::string& name, float value) const;
-	void SetVector(const std::string& name, float x, float y, float z) const;
 	void SetVector(const std::string& name, const Vector& v) const;
 	void SetVector2(const std::string& name, const Vector2& v) const;
 	void SetColor(const std::string& name, const Color& c) const;

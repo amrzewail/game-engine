@@ -9,6 +9,7 @@
 #include "GameObject.hpp"
 #include "lights/Lights.h"
 #include "lights/DirectionalLight.hpp"
+#include "Screen.h"
 
 class MeshRenderer : public Component, public Renderer
 {
@@ -71,7 +72,7 @@ public:
 
 		material->shader.SetColor("ambientColor", Color(0.3, 0.2, 0.1, 1));
 
-		//material->shader.SetVector2("screenResolution", Vector2(SCREEN_WIDTH, SCREEN_HEIGHT));
+		material->shader.SetVector2("screenResolution", Vector2(Screen::WIDTH, Screen::HEIGHT));
 
 		for (Light* light : lights)
 		{

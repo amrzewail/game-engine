@@ -23,6 +23,26 @@ public:
 		this->a = a;
 	}
 
+	Color(const Color& rhs)
+	{
+		this->r = rhs.r;
+		this->g = rhs.g;
+		this->b = rhs.b;
+		this->a = rhs.a;
+	}
+
+	Color& operator =(const Color& rhs)
+	{
+		if (this != &rhs)
+		{
+			this->r = rhs.r;
+			this->g = rhs.g;
+			this->b = rhs.b;
+			this->a = rhs.a;
+		}
+		return *this;
+	}
+
 	Color operator *(float value)
 	{
 		return Color(r * value, g * value, b * value, a * value);

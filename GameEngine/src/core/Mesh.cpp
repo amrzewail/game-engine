@@ -1,6 +1,12 @@
 #include "Mesh.hpp"
 #include <iostream>
 
+#define VERTEX_LOCATION 0
+#define NORMAL_LOCATION 1
+#define TEX_COORDS_LOCATION 2
+#define BONE_ID_LOCATION 3
+#define BONE_WEIGHT_LOCATION 4
+
 
 void Mesh::SetupMesh()
 {
@@ -11,23 +17,23 @@ void Mesh::SetupMesh()
 	glGenBuffers(1, &EBO);
 
 	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
 	// vertex positions
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STREAM_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, position));
-	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(VERTEX_LOCATION, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, position));
+	glEnableVertexAttribArray(VERTEX_LOCATION);
 
 	//// vertex normals
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(NORMAL_LOCATION, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+	glEnableVertexAttribArray(NORMAL_LOCATION);
 
 	// vertex texture coords
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
-	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(TEX_COORDS_LOCATION, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
+	glEnableVertexAttribArray(TEX_COORDS_LOCATION);
 
 	glBindVertexArray(0);
 

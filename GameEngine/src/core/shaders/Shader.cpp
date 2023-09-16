@@ -123,19 +123,6 @@ void Shader::SetFloat(const std::string& name, float value) const
 	glUniform1f(loc, value);
 }
 
-void Shader::SetVector(const std::string& name, float x, float y, float z) const
-{
-	const int loc = glGetUniformLocation(id, name.c_str());
-	if (loc < 0)
-	{
-#ifdef ENABLE_LOGGING
-		std::cerr << "Couldn't find " << name << std::endl;
-#endif
-		return;
-	}
-	glUniform3f(loc, x, y, z);
-}
-
 void Shader::SetVector(const std::string& name, const Vector& v) const
 {
 	const int loc = glGetUniformLocation(id, name.c_str());

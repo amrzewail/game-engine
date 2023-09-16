@@ -2,6 +2,7 @@
 
 #include "Vector.h"
 #include "Vector2.h"
+#include "animation/VertexBone.hpp"
 
 struct Vertex
 {
@@ -9,6 +10,8 @@ public:
 	Vector position;
 	Vector normal;
 	Vector2 texCoords;
+	int boneIds[4];
+	float boneWeights[4];
 
 	Vertex()
 	{

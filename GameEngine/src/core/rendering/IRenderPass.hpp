@@ -15,6 +15,6 @@ public:
 
 	virtual void Initialize(int index) = 0;
 
-	virtual void Render(Camera& camera) = 0;
+	virtual void Render(const IRenderPass& lastPass, Camera& camera) = 0;
 
 };

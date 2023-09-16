@@ -9,19 +9,19 @@
 #include "../assets/ShaderAsset.hpp"
 #include "../Quad.hpp"
 
-class BloomRenderPass : public IRenderPass
+class FXAARenderPass : public IRenderPass
 {
 private:
-	Shader* _bloomShader;
+	Shader* _fxaaShader;
 
 public:
 
-	BloomRenderPass()
+	FXAARenderPass()
 	{
 
 	}
 
-	~BloomRenderPass()
+	~FXAARenderPass()
 	{
 
 	}
@@ -43,7 +43,7 @@ public:
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureBuffer, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		_bloomShader = Assets::Load<ShaderAsset>("shaders/ss_bloom.shader").GetShader();
+		_fxaaShader = Assets::Load<ShaderAsset>("shaders/ss_fxaa.shader").GetShader();
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
@@ -58,8 +58,9 @@ public:
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, lastPass.textureBuffer);
 
-		_bloomShader->Use();
-		_bloomShader->SetInt("screenTexture", 0);
+		_fxaaShader->Use();
+		//_fxaaShader->SetVector2("screenResolution", )
+		_fxaaShader->SetInt("screenTexture", 0);
 
 		Quad::Render();
 
