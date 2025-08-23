@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Quaternion.hpp"
+
 struct Vector2
 {
 private:
@@ -41,8 +43,9 @@ public:
 	}
 
 
-	Vector2* operator +(Vector2& rhs) const
+	Vector2& operator +(Vector2& rhs) const
 	{
-		return new Vector2(x + rhs.x, y + rhs.y);
+		Vector2 v(x + rhs.x, y + rhs.y);
+		return v;
 	}
 };

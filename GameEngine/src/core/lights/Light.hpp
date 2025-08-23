@@ -7,7 +7,7 @@ class Lights;
 class Light
 {
 public:
-	Color* color;
+	Color color;
 	float intensity;
 	LightType type;
 	bool castShadows;

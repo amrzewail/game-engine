@@ -46,6 +46,7 @@ public:
 	void SetVector2(const std::string& name, const Vector2& v) const;
 	void SetColor(const std::string& name, const Color& c) const;
 	void SetMatrix4x4(const std::string& name, const Matrix4x4& m) const;
+	void SetMatrix4x4Array(const std::string& name, const Matrix4x4 array[], int length) const;
 
 	void SetDefine(string define)
 	{

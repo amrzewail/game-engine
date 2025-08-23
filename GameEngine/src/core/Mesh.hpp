@@ -3,27 +3,46 @@
 #include <vector>
 #include <glad/glad.h>
 
-#include "Vertex.h"
+#include "animation/Armature.hpp"
+#include "Submesh.hpp"
 
 struct Mesh
 {
 private:
-	mutable bool verticesDirty = false;
-	uint32_t VAO, VBO, EBO;
-
-	std::vector<Vertex> vertices;
-	std::vector<uint32_t> indices;
-
-	void SetupMesh();
+	std::vector<Submesh*> _submeshes;
+	std::vector<std::string> _materials;
 
 public:
 
-	Mesh();
-	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
-	~Mesh();
+	Mesh()
+	{
+	}
 
-	std::vector<Vertex> Vertices();
-	std::vector<unsigned int> Indices();
+	~Mesh()
+	{
+		for (auto m : _submeshes)
+		{
+			delete m;
+		}
+	}
 
-	void Draw() const;
+	void AddSubmesh(Submesh* submesh)
+	{
+		_submeshes.push_back(submesh);
+	}
+
+	void AddMaterialName(std::string materialName)
+	{
+		_materials.push_back(materialName);
+	}
+
+	std::vector<Submesh*> GetSubmeshes()
+	{
+		return _submeshes;
+	}
+
+	std::vector<std::string> GetMaterials()
+	{
+		return _materials;
+	}
 };

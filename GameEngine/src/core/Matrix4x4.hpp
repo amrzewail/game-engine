@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 
 #include "Quaternion.hpp"
+#include "Vector4.h"
 
 using namespace glm;
 
@@ -20,88 +21,124 @@ private:
 		return *_matrix;
 	}
 
-	static Matrix4x4* FromMat4(glm::mat4 mat)
+	static Matrix4x4 FromMat4(glm::mat4 mat)
 	{
-		return new Matrix4x4(
-			mat[0][0], mat[0][1], mat[0][2], mat[0][3],
-			mat[1][0], mat[1][1], mat[1][2], mat[1][3],
-			mat[2][0], mat[2][1], mat[2][2], mat[2][3],
-			mat[3][0], mat[3][1], mat[3][2], mat[3][3]);
+		return Matrix4x4(
+			mat[0][0], mat[1][0], mat[2][0], mat[3][0],
+			mat[0][1], mat[1][1], mat[2][1], mat[3][1],
+			mat[0][2], mat[1][2], mat[2][2], mat[3][2],
+			mat[0][3], mat[1][3], mat[2][3], mat[3][3]);
 	}
 
 public:
 
-	static Matrix4x4* Identity()
+	static Matrix4x4 Identity()
 	{
-		return new Matrix4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+		Matrix4x4 mat;
+		mat.SetIdentity();
+		return mat;
 	}
 
-	static Matrix4x4* Zero()
+	static Matrix4x4 Zero()
 	{
-		return new Matrix4x4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		return Matrix4x4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	}
 
-	static Matrix4x4* Rotate(Quaternion& quaternion)
+	static Matrix4x4 Rotate(const Quaternion quaternion)
 	{
-		Quaternion q = *quaternion.Normalized();
-
-		return FromMat4(glm::mat4_cast(glm::fquat(quaternion.W(), quaternion.X(), quaternion.Y(), quaternion.Z())));
+		return FromMat4(glm::mat4_cast(glm::fquat(quaternion.w, quaternion.x, quaternion.y, quaternion.z)));
 	}
 
-	static Matrix4x4* Translate(Vector& vector)
+	static Matrix4x4 Translate(Vector vector)
 	{
-		return FromMat4(glm::translate(mat4(1.0), vec3(vector.x, vector.y, vector.z)));
+		Matrix4x4 m(1, 0, 0, vector.x,
+			0, 1, 0, vector.y,
+			0, 0, 1, vector.z,
+			0, 0, 0, 1);
+		return m;
 	}
 
-	static Matrix4x4* Scale(Vector& vector)
+	static Matrix4x4 Scale(Vector vector)
 	{
 		return FromMat4(glm::scale(mat4(1.0), vec3(vector.x, vector.y, vector.z)));
 	}
 
-	static Matrix4x4* TRS(Vector& translation, Quaternion& rotation, Vector& scale)
+	static const Matrix4x4 TRS(Vector t, Quaternion r, Vector s)
 	{
-		mat4 trans = glm::translate(glm::mat4(1.0f), glm::vec3(translation.x, translation.y, translation.z));
-		mat4 rotate = glm::mat4_cast(glm::fquat(rotation.W(), rotation.X(), rotation.Y(), rotation.Z()));
-		mat4 scaleMat = glm::scale(glm::mat4(1.0), glm::vec3(scale.x, scale.y, scale.z));
+		Vector position = Vector(t.x, t.y, t.z);
+		Quaternion rotation = r;
+		Vector scale = s;
 
-		return FromMat4(trans * rotate * scaleMat);
+		Vector4 c0(rotation * Vector(scale.x, 0, 0), 0);
+		Vector4 c1(rotation * Vector(0, scale.y, 0), 0);
+		Vector4 c2(rotation * Vector(0, 0, scale.z), 0);
+		Vector4 c3(position, 1);
 
+		Matrix4x4 m(c0, c1, c2, c3);
+
+		return m;
 	}
 
-	static Matrix4x4* Perspective(float fov, float aspect, float zNear, float zFar)
+	static Matrix4x4 Perspective(float fov, float aspect, float zNear, float zFar)
 	{
 		fov = glm::radians(fov);
-		return FromMat4(glm::perspective(fov, aspect, zNear, zFar));
+		Matrix4x4 mat = FromMat4(glm::perspectiveLH(fov, aspect, zNear, zFar));
+
+		//mat.Set(0, 2, -mat.At(0, 2));
+		//mat.Set(1, 2, -mat.At(1, 2));
+		//mat.Set(2, 2, -mat.At(2, 2));
+		//mat.Set(3, 2, -mat.At(3, 2));
+
+		return mat;
 	}
 
-	static Matrix4x4* Inverse(Matrix4x4& matrix)
+	static Matrix4x4 Inverse(Matrix4x4& matrix)
 	{
 		return FromMat4(glm::inverse(matrix.Value()));
 	}
 
-	static Matrix4x4* LookAt(Vector& from, Vector& to, Vector& up)
+	static Matrix4x4 LookAt(Vector& from, Vector& to, Vector& up)
 	{
 		return FromMat4(glm::lookAt(glm::vec3(from.x, from.y, from.z), glm::vec3(to.x, to.y, to.z), glm::vec3(up.x, up.y, up.z)));
 	}
 
-	Matrix4x4(	
-		float x0, float y0, float z0, float w0,
-		float x1, float y1, float z1, float w1,
-		float x2, float y2, float z2, float w2,
-		float x3, float y3, float z3, float w3)
+	//row,column
+	Matrix4x4(
+		float c00, float c01, float c02, float c03,
+		float c10, float c11, float c12, float c13,
+		float c20, float c21, float c22, float c23,
+		float c30, float c31, float c32, float c33)
 	{
-		_matrix = new mat4(x0, y0, z0, w0, x1, y1, z1, w1, x2, y2, z2, w2, x3, y3, z3, w3);
-
+		_matrix = new mat4();
 		_data = new float[4 * 4];
-		int index = 0;
-		for (int x = 0; x < 4; ++x)
-		{
-			for (int y = 0; y < 4; ++y)
-			{
-				_data[index++] = (*_matrix)[x][y];
-			}
-		}
+		Set(c00, c01, c02, c03, c10, c11, c12, c13, c20, c21, c22, c23, c30, c31, c32, c33);
 	}
+
+
+	Matrix4x4() : Matrix4x4(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+	{
+	}
+
+	Matrix4x4(const Vector4& c0, const Vector4& c1, const Vector4& c2, const Vector4& c3) : Matrix4x4(	c0.x, c1.x, c2.x, c3.x,
+																										c0.y, c1.y, c2.y, c3.y,
+																										c0.z, c1.z, c2.z, c3.z, 
+																										c0.w, c1.w, c2.w, c3.w) {}
+
+
+	Matrix4x4(const Matrix4x4& source) : Matrix4x4()
+	{
+		*_matrix = mat4(*source._matrix);
+		for (int i = 0; i < 16; i++) _data[i] = source._data[i];
+	}
+
+	Matrix4x4& operator=(const Matrix4x4& rhs)
+	{
+		if (this == &rhs) return *this;
+		*_matrix = mat4(*rhs._matrix);
+		for (int i = 0; i < 16; i++) _data[i] = rhs._data[i];
+		return *this;
+	}
+
 
 	~Matrix4x4()
 	{
@@ -119,6 +156,85 @@ public:
 		return _data;
 	}
 
+	void Set(const int row, const int column, const float value)
+	{
+		_matrix->operator[](column)[row] = value;
+		_data[column * 4 + row] = value;
+	}
+
+	void Set(float c00, float c01, float c02, float c03,
+		float c10, float c11, float c12, float c13,
+		float c20, float c21, float c22, float c23,
+		float c30, float c31, float c32, float c33)
+	{
+		Set(0, 0, c00);
+		Set(0, 1, c01);
+		Set(0, 2, c02);
+		Set(0, 3, c03);
+
+		Set(1, 0, c10);
+		Set(1, 1, c11);
+		Set(1, 2, c12);
+		Set(1, 3, c13);
+
+		Set(2, 0, c20);
+		Set(2, 1, c21);
+		Set(2, 2, c22);
+		Set(2, 3, c23);
+
+		Set(3, 0, c30);
+		Set(3, 1, c31);
+		Set(3, 2, c32);
+		Set(3, 3, c33);
+	}
+
+	Vector GetColumn(int columnIndex)
+	{
+		return Vector(At(0, columnIndex), At(1, columnIndex), At(2, columnIndex));
+	}
+
+	Vector GetTranslation()
+	{
+		return GetColumn(3);
+	}
+
+	//Vector GetScale()
+	//{
+	//	float x = glm::sqrt(At(0, 0) * At(0, 0) + At(1, 0) * At(1, 0) + At(2, 0) * At(2, 0));
+	//	float y = glm::sqrt(At(0, 1) * At(0, 1) + At(1, 1) * At(1, 1) + At(2, 1) * At(2, 1));
+	//	float z = glm::sqrt(At(0, 2) * At(0, 2) + At(1, 2) * At(1, 2) + At(2, 2) * At(2, 2));
+	//	return Vector(x, y, z);
+	//}
+
+	Quaternion GetRotation()
+	{
+		fquat quat = glm::quat_cast(*_matrix);
+		return Quaternion(quat.w, quat.x, quat.y, quat.z);
+	}
+
+	//void ExtractTRS(Vector& position, Quaternion& rotation, Vector& scale)
+	//{
+
+	//}
+
+	void SetIdentity()
+	{
+		Set(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+	}
+
+	void SetInverse()
+	{
+		*_matrix = glm::inverse(Value());
+		int index = 0;
+		for (int x = 0; x < 4; ++x)
+		{
+			for (int y = 0; y < 4; ++y)
+			{
+				_data[index++] = (*_matrix)[x][y];
+			}
+		}
+	}
+
 	std::string ToString() const
 	{
 		std::string s;
@@ -134,7 +250,19 @@ public:
 		return s;
 	}
 
-	Matrix4x4* operator *(Matrix4x4& rhs) const
+	void MultiplyVector(Vector* rhs)
+	{
+		Vector result;
+		result.x = At(0, 0) * rhs->x + At(0, 1) * rhs->y + At(0, 2) * rhs->z;
+		result.y = At(1, 0) * rhs->x + At(1, 1) * rhs->y + At(1, 2) * rhs->z;
+		result.z = At(2, 0) * rhs->x + At(2, 1) * rhs->y + At(2, 2) * rhs->z;
+
+		rhs->x = result.x;
+		rhs->y = result.y;
+		rhs->z = result.z;
+	}
+
+	Matrix4x4 operator *(Matrix4x4& rhs) const
 	{
 		mat4 rhsM = rhs.Value();
 		rhsM = (*_matrix) * rhsM;
@@ -143,13 +271,24 @@ public:
 
 	}
 
-
-	Vector* operator* (Vector& rhs)
+	Matrix4x4 operator *(float rhs) const
 	{
-		Vector* result = new Vector();
-		result->x = At(0, 0) * rhs.x + At(0, 1) * rhs.y + At(0, 2) * rhs.z;
-		result->y = At(1, 0) * rhs.x + At(1, 1) * rhs.y + At(1, 2) * rhs.z;
-		result->z = At(2, 0) * rhs.x + At(2, 1) * rhs.y + At(2, 2) * rhs.z;
+		*_matrix = *_matrix * rhs;
+		return FromMat4(*_matrix);
+	}
+
+	Matrix4x4 operator +=(Matrix4x4 rhs) const
+	{
+		*_matrix += rhs.Value();
+		return FromMat4(*_matrix);
+	}
+
+	Vector operator* (const Vector& rhs)
+	{
+		Vector result;
+		result.x = At(0, 0) * rhs.x + At(0, 1) * rhs.y + At(0, 2) * rhs.z;
+		result.y = At(1, 0) * rhs.x + At(1, 1) * rhs.y + At(1, 2) * rhs.z;
+		result.z = At(2, 0) * rhs.x + At(2, 1) * rhs.y + At(2, 2) * rhs.z;
 		return result;
 	}
 

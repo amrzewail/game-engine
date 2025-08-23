@@ -4,7 +4,7 @@
 
 Light::Light()
 {
-	color = new Color(1, 1, 1, 1);
+	color = Color(1, 1, 1, 1);
 	intensity = 0;
 
 	Lights::AddLight(this);
@@ -12,8 +12,6 @@ Light::Light()
 
 Light::~Light()
 {
-	delete color;
-
 	Lights::RemoveLight(this);
 }
 

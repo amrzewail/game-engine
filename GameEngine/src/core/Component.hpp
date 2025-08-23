@@ -23,7 +23,6 @@ public:
 
 	virtual void Update(float deltaTime);
 
-
 	virtual void Render(Camera& targetCamera) const;
 
 	virtual void OnDestroy();

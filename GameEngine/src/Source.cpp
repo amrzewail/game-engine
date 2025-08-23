@@ -18,15 +18,11 @@
 #include "Utilities.h"
 #include "Callbacks.h"
 #include "DrawDetails.h"
-#include "core/Vertex.h"
-#include "OpenGLLoader.h"
-#include "OpenGLDraw.h"
 #include "Input.h"
 #include "GLSLShaderLoader.h"
 
 #include "core/Vector.h"
 #include "core/Vector2.h"
-#include "core/Vertex.h"
 #include "core/Mesh.hpp"
 
 #include "core/assets/Asset.h"
@@ -52,13 +48,41 @@
 #include "core/rendering/BloomRenderPass.hpp"
 #include "core/rendering/FXAARenderPass.h"
 #include "core/Quad.hpp"
+#include "core/events/Event.h"
 
 float deltaTime = 0.0f;
-float lastTimeMs = 0.0f;
+float lastTimeSecs = 0.0f;
+
+//{
+//	int number = 0;
+//	int step = 90;
+//	for (int x = 0; x <= 360; x += step)
+//	{
+//		for (int y = 0; y <= 360; y += step)
+//		{
+//			for (int z = 0; z <= 360; z += step)
+//			{
+//				Vector euler(x, y, z);
+//				Quaternion q = Quaternion::Euler(euler.x, euler.y, euler.z);
+//				Vector v = q.EulerAngles();
+//				std::cout << number++ << ") " << euler.ToString() << " " << q.ToString() << " " << v.ToString() << std::endl << std::endl;
+//			}
+//		}
+//	}
+//	//Quaternion q = Quaternion(0.5, 0, 0.86603, 0);
+//	//Quaternion q(0.5, 0, 0.866, 0);
+//	//Quaternion q = Quaternion::Euler(89,179, 0);
+//	//std::cout << q.ToString() << std::endl;
+//	//std::cout << q.EulerAngles().ToString() << std::endl;
+//	//float angle = Vector::Angle(Vector(0, 1, 1), Vector(0, 1, 0));
+//	//std::cout << angle << std::endl;
+//}
 
 
 int main(int argc, char** argv)
 {
+
+
 	glfwSetErrorCallback(glfw_error_callback);
 
 	glfwInit();
@@ -81,6 +105,11 @@ int main(int argc, char** argv)
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+	glEnable(GL_CULL_FACE);
+	//glCullFace(GL_BACK);
+	//glCullFace(GL_FRONT);
+	glFrontFace(GL_CCW);
+
 	Quad::Initialize();
 
 	const Shader& screenShader = *Assets::Load<ShaderAsset>("shaders/screen.shader").GetShader();
@@ -98,12 +127,10 @@ int main(int argc, char** argv)
 	Material fabricMaterial = Material("Fabric", lit, fabricTex.GetTexture());
 	Material gridMaterial = Material("Grid", lit, gridTex.GetTexture());
 
-	ModelAsset& jayneModel = Assets::Load<ModelAsset>("models/Jayne.fbx");
+	ModelAsset& jayneModel = Assets::Load<ModelAsset>("models/Jayne_simple.fbx");
+	//ModelAsset& cube = Assets::Load<ModelAsset>("models/cube.obj");
 
-	ModelAsset& xbotModel = Assets::Load<ModelAsset>("models/xbot.fbx");
-
-	ModelAsset& cube = Assets::Load<ModelAsset>("models/cube.obj");
-
+	std::cout << jayneModel.GetModel()->armature->ToString() << std::endl;
 
 	Camera& camera = *new Camera();
 	camera.aspect = float(Screen::WIDTH) / Screen::HEIGHT;
@@ -121,82 +148,69 @@ int main(int argc, char** argv)
 		TextureAsset& chainmailTex = Assets::Load<TextureAsset>("textures/CHAINMAIL_tex.jpg");
 		TextureAsset& scarfTex = Assets::Load<TextureAsset>("textures/CLOTH_tex.png");
 
-		std::vector<Material*> jayneMaterials = std::vector<Material*>();
+		std::map<std::string, Material*> jayneMaterials = std::map<std::string, Material*>();
 
 		Material& hairMaterial = *new Material("Hair", hairShader, hairTex.GetTexture());
 		hairMaterial.SetColor("ucolor", Color(0.6, 0, 0, 1));
 
-		jayneMaterials.push_back(new Material("Eyeball", eyeShader, faceTex.GetTexture()));
-		jayneMaterials.push_back(new Material("Face", faceShader, faceTex.GetTexture()));
-		jayneMaterials.push_back(new Material("Body", lit, bodyTex.GetTexture()));
-		jayneMaterials.push_back(new Material("Eyelashes", litClip, faceTex.GetTexture()));
-		jayneMaterials.push_back(&hairMaterial);
-		jayneMaterials.push_back(new Material("Hair2", hairShader, hairTex.GetTexture()));
-		jayneMaterials.push_back(new Material("Underwear", lit, clothTex.GetTexture()));
-		jayneMaterials.push_back(new Material("Cloth", lit, clothTex.GetTexture()));
-		jayneMaterials.push_back(new Material("Leather", lit, leatherTex.GetTexture()));
-		jayneMaterials.push_back(new Material("Gold", lit, goldTex.GetTexture()));
-		jayneMaterials.push_back(new Material("Chainmail", litClip, chainmailTex.GetTexture()));
-		jayneMaterials.push_back(new Material("Scarf", lit, scarfTex.GetTexture()));
-		jayneMaterials.push_back(new Material("Brown", lit, leatherTex.GetTexture()));
+		jayneMaterials["Adventurer_Pants"] = new Material("Adventurer_Pants", lit, clothTex.GetTexture());
+		jayneMaterials["Adventurer_Shirt"] = new Material("Adventurer_Shirt", lit, clothTex.GetTexture());
 
+		jayneMaterials["Body"] = new Material("Body", lit, bodyTex.GetTexture());
+		jayneMaterials["Body_Chest"] = new Material("Body_Chest", lit, bodyTex.GetTexture());
+		jayneMaterials["Body_Shorts"] = new Material("Body_Shorts", lit, bodyTex.GetTexture());
 
-		for (int i = 0; i < jayneModel.Meshes().size(); i++)
+		jayneMaterials["Cloth"] = new Material("Cloth", lit, clothTex.GetTexture());
+
+		jayneMaterials["Eyeball"] = new Material("Eyeball", eyeShader, faceTex.GetTexture());
+		jayneMaterials["Eyelashes"] = new Material("Eyelashes", litClip, faceTex.GetTexture());
+
+		jayneMaterials["Face"] = new Material("Face", faceShader, faceTex.GetTexture());
+
+		jayneMaterials["Gold"] = new Material("Gold", lit, goldTex.GetTexture());
+
+		jayneMaterials["Hair"] = &hairMaterial;
+
+		jayneMaterials["Leather"] = new Material("Leather", lit, leatherTex.GetTexture());
+
+		int jayneMeshSize = jayneModel.GetModel()->meshes.size();
+		for (int i = jayneMeshSize - 1; i >= 0; i--)
 		{
-			//if (*jayneModel.Meshes()[i]->materialName != "Eyeball") continue;
-
+			auto mesh = jayneModel.GetModel()->meshes[i];
 			MeshRenderer& renderer = jayneGameObject.AddComponent<MeshRenderer>();
-			renderer.mesh = jayneModel.Meshes()[i]->mesh;
-			for (auto* material : jayneMaterials)
+			renderer.SetMesh(mesh);
+			renderer.animation = *jayneModel.GetModel()->animations[0];
+			renderer.armature = jayneModel.GetModel()->armature;
+
+			auto meshMaterials = mesh->GetMaterials();
+
+			for (auto meshMaterial : meshMaterials)
 			{
-				if (material->name == *jayneModel.Meshes()[i]->materialName)
-				{
-					renderer.material = material;
-					break;
-				}
+				renderer.materials.push_back(jayneMaterials[meshMaterial]);
 			}
 		}
 	}
 
-	GameObject& xbotGameObject = *new GameObject();
-	{
-		*xbotGameObject.transform->position = Vector(0, 0, 5);
-		*xbotGameObject.transform->localScale = Vector(0.01, 0.01, 0.01);
-		for (int i = 0; i < xbotModel.Meshes().size(); i++)
-		{
-			//if (*jayneModel.Meshes()[i]->materialName != "Eyeball") continue;
+	//GameObject& floorGameObject = *new GameObject();
+	//{// floor game object renderer
+	//	Material* gridMaterial = new Material("Grid", lit, gridTex.GetTexture());
 
-			MeshRenderer& renderer = xbotGameObject.AddComponent<MeshRenderer>();
-			renderer.mesh = xbotModel.Meshes()[i]->mesh;
-			renderer.material = &gridMaterial;
-			//for (auto* material : jayneMaterials)
-			//{
-			//	if (material->name == *jayneModel.Meshes()[i]->materialName)
-			//	{
-			//		renderer.material = material;
-			//		break;
-			//	}
-			//}
-		}
-	}
+	//	MeshRenderer& renderer = floorGameObject.AddComponent<MeshRenderer>();
+	//	renderer.materials.push_back(gridMaterial);
+	//	renderer.SetMesh(cube.GetModel()->meshes[0]);
+	//}
 
 
-	GameObject& floorGameObject = *new GameObject();
-	{// floor game object renderer
-
-
-		Material* gridMaterial = new Material("Grid", lit, fabricTex.GetTexture());
-
-		MeshRenderer& renderer = floorGameObject.AddComponent<MeshRenderer>();
-		renderer.material = gridMaterial;
-		renderer.mesh = cube.Meshes()[0]->mesh;
-	}
+	//{
+	//	floorGameObject.transform->position = Vector(0, -0.1, 0);
+	//	floorGameObject.transform->localScale = Vector(2, 0.01, 2);
+	//}
 
 
 	DirectionalLight* directionalLight = new DirectionalLight();
 	directionalLight->intensity = 1.5;
-	directionalLight->direction = new Vector(0, -1, -1);
-	directionalLight->color = new Color(1, 0.8, 0.8, 1);
+	directionalLight->direction = Vector(0, -1, 1);
+	directionalLight->color = Color(1, 0.8, 0.8, 1);
 
 	float rotY = 0;
 
@@ -226,21 +240,25 @@ int main(int argc, char** argv)
 		pass->Initialize(index++);
 	}
 
-	*camera.transform->position = Vector(0.15, 1.6, -0.3);
-	*camera.transform->rotation = Quaternion::Euler(-10, 30, 0);
-
 	double lastMouseX = 0, lastMouseY = 0;
 
-	//glEnable(GL_MULTISAMPLE);
-	//glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
-	//glEnable(GL_SAMPLE_ALPHA_TO_ONE);
-	//glEnable(GL_SAMPLE_COVERAGE);
+	//camera
+	{
+		camera.transform->position = Vector(0, 3, -3);
+		camera.transform->set_EulerAngles(Vector(30, 0, 0));
+	}
+
+	//jayne
+	{
+		jayneGameObject.transform->position = Vector::Zero();
+		//jayneGameObject.transform->set_EulerAngles(0, 180, 0);
+	}
 
 	while (!glfwWindowShouldClose(window))
 	{
-		float currentTimeMs = glfwGetTime();
-		deltaTimeAccumulator += lastTimeMs == 0.0f ? 0.0f : currentTimeMs - lastTimeMs;
-		lastTimeMs = currentTimeMs;
+		float currentTimeSecs = glfwGetTime();
+		deltaTimeAccumulator += lastTimeSecs == 0.0f ? 0.0f : currentTimeSecs - lastTimeSecs;
+		lastTimeSecs = currentTimeSecs;
 
 		while (deltaTimeAccumulator >= targetFrameTime)
 		{
@@ -249,77 +267,86 @@ int main(int argc, char** argv)
 				deltaTime = deltaTimeAccumulator;
 				deltaTimeAccumulator = 0;
 
-
-
-				rotY += 4 * deltaTime;
-
-				*directionalLight->direction = Vector(-0.6, -0.6, 1);
+				rotY += 1 * deltaTime;
 
 				camera.CalculateProjectionMatrix();
 
 				//inputs
 				{
-					float cameraSpeed = 2;
-
-					if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+					//Camera controls
 					{
-						*camera.transform->position += camera.transform->Right() * cameraSpeed * deltaTime;
+						float cameraSpeed = 2;
+
+						double mouseX, mouseY;
+						glfwGetCursorPos(window, &mouseX, &mouseY);
+
+						Vector cameraEuler = camera.transform->get_EulerAngles();
+
+						cameraEuler.y += (mouseX - lastMouseX) * deltaTime;
+						cameraEuler.x += (mouseY - lastMouseY) * deltaTime;
+						cameraEuler.z = 0;
+
+						lastMouseX = mouseX;
+						lastMouseY = mouseY;
+
+						camera.transform->set_EulerAngles(cameraEuler);
+
+						Vector direction = Vector::Forward();
+						direction = camera.transform->get_Rotation() * direction;
+						camera.transform->position = (jayneGameObject.transform->position + Vector::Up()) - direction * 2;
+
 					}
 
-					if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+
+
+					//jayne inputs
 					{
-						*camera.transform->position += -camera.transform->Right() * cameraSpeed * deltaTime;
+
+						Vector euler = jayneGameObject.transform->get_EulerAngles();
+						Vector position = jayneGameObject.transform->position;
+
+						Vector cameraForward = camera.transform->Forward();
+						cameraForward.y = 0;
+						cameraForward.Normalize();
+
+						Vector cameraRight = camera.transform->Right();
+						cameraRight.y = 0;
+						cameraRight.Normalize();
+
+
+						if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+						{
+							position += cameraRight * deltaTime;
+							euler.y = camera.transform->get_EulerAngles().y + 90;
+						}
+
+						if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+						{
+							position -= cameraRight * deltaTime;
+							euler.y = camera.transform->get_EulerAngles().y - 90;
+						}
+
+						if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+						{
+							position += cameraForward * deltaTime;
+							euler.y = camera.transform->get_EulerAngles().y;
+						}
+
+						if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+						{
+							position -= cameraForward * deltaTime;
+							euler.y = camera.transform->get_EulerAngles().y + 180;
+						}
+
+						jayneGameObject.transform->position = position;
+						jayneGameObject.transform->set_EulerAngles(euler);
+
+
+						euler = jayneGameObject.transform->get_EulerAngles();
+						//std::cout << "forward: " + jayneGameObject.transform->Forward().ToString() + " position:" + position.ToString() + " euler:" + euler.ToString() << std::endl;
 					}
-
-					if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-					{
-						*camera.transform->position += camera.transform->Forward() * cameraSpeed * deltaTime;
-					}
-
-					if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-					{
-						*camera.transform->position += -camera.transform->Forward() * cameraSpeed * deltaTime;
-					}
-
-					if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-					{
-						camera.transform->position->y += cameraSpeed * deltaTime;
-					}
-
-					if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-					{
-						camera.transform->position->y -= cameraSpeed * deltaTime;
-					}
-
-					double mouseX, mouseY;
-					glfwGetCursorPos(window, &mouseX, &mouseY);
-
-					Vector cameraEuler = camera.transform->EulerAngles();
-
-					cameraEuler.y -= (mouseX - lastMouseX) * deltaTime;
-					cameraEuler.x -= (mouseY - lastMouseY) * deltaTime;
-					cameraEuler.z = 0;
-
-					lastMouseX = mouseX;
-					lastMouseY = mouseY;
-
-					*camera.transform->rotation = cameraEuler;
-
-					//std::cout << "Camera Position: " << camera.transform->position->ToString() << std::endl;
 
 					ProcessInput(window);
-
-				}
-
-				{
-					floorGameObject.transform->position->y = -0.1;
-					floorGameObject.transform->localScale = new Vector(2, 0.01, 2);
-				}
-
-
-				{
-					*jayneGameObject.transform->position = Vector(0, 0, 0);
-					*jayneGameObject.transform->rotation = Quaternion::Euler(270, 0, 0);
 				}
 			}
 
@@ -335,8 +362,7 @@ int main(int argc, char** argv)
 
 				glBindFramebuffer(GL_FRAMEBUFFER, 0);
 				glClearColor(0, 0, 0, 0);
-				glClear(GL_COLOR_BUFFER_BIT);
-				glDisable(GL_DEPTH_TEST);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, lastPass->textureBuffer);
@@ -355,8 +381,6 @@ int main(int argc, char** argv)
 	}
 
 
-	delete& jayneGameObject;
-
 	Assets::UnloadAll();
 
 
@@ -365,3 +389,65 @@ int main(int argc, char** argv)
 
 	return 0;
 }
+
+
+
+/*
+
+					//Camera controls
+					{
+						float cameraSpeed = 2;
+
+						if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+						{
+							*camera.transform->position += camera.transform->Right() * cameraSpeed * deltaTime;
+						}
+
+						if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+						{
+							*camera.transform->position += -camera.transform->Right() * cameraSpeed * deltaTime;
+						}
+
+						if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+						{
+							*camera.transform->position += camera.transform->Forward() * cameraSpeed * deltaTime;
+						}
+
+						if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+						{
+							*camera.transform->position += -camera.transform->Forward() * cameraSpeed * deltaTime;
+						}
+
+						if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+						{
+							camera.transform->position->y += cameraSpeed * deltaTime;
+						}
+
+						if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+						{
+							camera.transform->position->y -= cameraSpeed * deltaTime;
+						}
+
+						double mouseX, mouseY;
+						glfwGetCursorPos(window, &mouseX, &mouseY);
+
+						Vector cameraEuler = camera.transform->get_EulerAngles();
+
+						//std::cout << "mouseX: " << (mouseX - lastMouseX) << "  mouseY: " << -(mouseY - lastMouseY) << std::endl;
+
+						cameraEuler.y += (mouseX - lastMouseX) * deltaTime;
+						cameraEuler.x += (mouseY - lastMouseY) * deltaTime;
+						cameraEuler.z = 0;
+
+						lastMouseX = mouseX;
+						lastMouseY = mouseY;
+
+						//std::cout << cameraEuler.ToString() << std::endl;
+
+						camera.transform->set_EulerAngles(cameraEuler);
+
+						std::cout << camera.transform->Forward().ToString() << std::endl;
+					}
+
+
+*/

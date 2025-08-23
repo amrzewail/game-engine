@@ -46,7 +46,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -117,6 +117,8 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;WIN32;dSINGLE;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -140,6 +142,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -152,7 +156,10 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\Math.cpp" />
+    <ClCompile Include="src\core\assets\ModelImporter.cpp" />
     <ClCompile Include="src\core\Quad.cpp" />
+    <ClCompile Include="src\core\Quaternion.cpp" />
     <ClCompile Include="src\core\rendering\Renderer.cpp" />
     <ClCompile Include="src\core\rendering\Renderers.cpp" />
     <ClCompile Include="src\core\Component.cpp" />
@@ -163,13 +170,23 @@
     <ClCompile Include="src\core\Texture.hpp" />
     <ClCompile Include="src\libs\image.cpp" />
     <ClCompile Include="src\core\assets\Assets.cpp" />
-    <ClCompile Include="src\core\Mesh.cpp" />
     <ClCompile Include="src\core\shaders\Shader.cpp" />
     <ClCompile Include="src\Source.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Asset.h" />
-    <ClInclude Include="src\core\animation\VertexBone.hpp" />
+    <ClInclude Include="src\core\animation\MeshBone.hpp" />
+    <ClInclude Include="src\core\events\Event.h" />
+    <ClInclude Include="src\core\Math.h" />
+    <ClInclude Include="src\core\animation\Animation.hpp" />
+    <ClInclude Include="src\core\animation\Keyframe.hpp" />
+    <ClInclude Include="src\core\animation\KeyframeProperty.hpp" />
+    <ClInclude Include="src\core\animation\Armature.hpp" />
+    <ClInclude Include="src\core\assets\data\Model.hpp" />
+    <ClInclude Include="src\core\assets\importers\AssimpImporter.hpp" />
+    <ClInclude Include="src\core\assets\ModelImporter.h" />
+    <ClInclude Include="src\core\animation\Bone.h" />
+    <ClInclude Include="src\core\animation\BoneWeight.hpp" />
     <ClInclude Include="src\core\assets\ShaderAsset.hpp" />
     <ClInclude Include="src\core\input\InputActionType.h" />
     <ClInclude Include="src\core\input\InputAction.hpp" />
@@ -192,7 +209,9 @@
     <ClInclude Include="src\core\rendering\SceneRenderPass.h" />
     <ClInclude Include="src\core\Screen.h" />
     <ClInclude Include="src\core\shaders\ShaderCompiler.hpp" />
+    <ClInclude Include="src\core\Submesh.hpp" />
     <ClInclude Include="src\core\utils\Guid.hpp" />
+    <ClInclude Include="src\core\Vector4.h" />
     <ClInclude Include="src\libs\image.h" />
     <ClInclude Include="src\Callbacks.h" />
     <ClInclude Include="src\core\assets\Asset.h" />
@@ -209,31 +228,14 @@
     <ClInclude Include="src\core\Transform.hpp" />
     <ClInclude Include="src\core\Vector.h" />
     <ClInclude Include="src\core\Vector2.h" />
-    <ClInclude Include="src\core\Vertex.h" />
     <ClInclude Include="src\Input.h" />
     <ClInclude Include="src\libs\stb_image.h" />
-    <ClInclude Include="src\OpenGLDraw.h" />
-    <ClInclude Include="src\OpenGLLoader.h" />
     <ClInclude Include="src\GLSLShaderLoader.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\Utilities.h" />
     <ClInclude Include="src\DrawDetails.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\shaders\core.frag" />
-    <None Include="assets\shaders\core.vert" />
-    <None Include="assets\shaders\eye.shader" />
-    <None Include="assets\shaders\face.shader" />
-    <None Include="assets\shaders\fxaa.frag" />
-    <None Include="assets\shaders\gaussian_blur.frag" />
-    <None Include="assets\shaders\hair.shader" />
-    <None Include="assets\shaders\lit.shader" />
-    <None Include="assets\shaders\lit_clip.shader" />
-    <None Include="assets\shaders\lit_transparent.shader" />
-    <None Include="assets\shaders\noise.frag" />
-    <None Include="assets\shaders\screen.shader" />
-    <None Include="assets\shaders\ss_bloom.shader" />
-    <None Include="assets\shaders\ss_fxaa.shader" />
     <None Include="C:\Programming\Project Painter\Assets\Models\Jayne\Jayne.fbx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

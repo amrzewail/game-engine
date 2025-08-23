@@ -28,12 +28,6 @@
     <ClInclude Include="src\DrawDetails.h">
       <Filter>src\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\OpenGLDraw.h">
-      <Filter>src\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\OpenGLLoader.h">
-      <Filter>src\rendering</Filter>
-    </ClInclude>
     <ClInclude Include="src\Input.h">
       <Filter>src\Header Files</Filter>
     </ClInclude>
@@ -68,9 +62,6 @@
       <Filter>src\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\core\Mesh.hpp">
-      <Filter>src\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\Vertex.h">
       <Filter>src\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\core\Vector2.h">
@@ -166,7 +157,46 @@
     <ClInclude Include="src\core\Quad.hpp">
       <Filter>src\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\animation\VertexBone.hpp">
+    <ClInclude Include="src\core\animation\BoneWeight.hpp">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\animation\Bone.h">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\assets\ModelImporter.h">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\assets\importers\AssimpImporter.hpp">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\assets\data\Model.hpp">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\Submesh.hpp">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\animation\Animation.hpp">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\animation\Keyframe.hpp">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\animation\KeyframeProperty.hpp">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\animation\Armature.hpp">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\Math.h">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\Vector4.h">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\events\Event.h">
+      <Filter>src\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\animation\MeshBone.hpp">
       <Filter>src\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -176,7 +206,6 @@
     </ClCompile>
     <ClCompile Include="src\core\assets\Assets.cpp" />
     <ClCompile Include="src\core\shaders\Shader.cpp" />
-    <ClCompile Include="src\core\Mesh.cpp" />
     <ClCompile Include="src\libs\image.cpp" />
     <ClCompile Include="src\core\Texture.hpp" />
     <ClCompile Include="src\core\GameObject.cpp" />
@@ -187,22 +216,11 @@
     <ClCompile Include="src\core\rendering\Renderers.cpp" />
     <ClCompile Include="src\core\rendering\Renderer.cpp" />
     <ClCompile Include="src\core\Quad.cpp" />
+    <ClCompile Include="src\core\assets\ModelImporter.cpp" />
+    <ClCompile Include="src\core\Quaternion.cpp" />
+    <ClCompile Include="src\core\Math.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="C:\Programming\Project Painter\Assets\Models\Jayne\Jayne.fbx" />
-    <None Include="assets\shaders\lit.shader" />
-    <None Include="assets\shaders\core.vert" />
-    <None Include="assets\shaders\core.frag" />
-    <None Include="assets\shaders\lit_clip.shader" />
-    <None Include="assets\shaders\lit_transparent.shader" />
-    <None Include="assets\shaders\eye.shader" />
-    <None Include="assets\shaders\noise.frag" />
-    <None Include="assets\shaders\face.shader" />
-    <None Include="assets\shaders\gaussian_blur.frag" />
-    <None Include="assets\shaders\ss_bloom.shader" />
-    <None Include="assets\shaders\screen.shader" />
-    <None Include="assets\shaders\hair.shader" />
-    <None Include="assets\shaders\ss_fxaa.shader" />
-    <None Include="assets\shaders\fxaa.frag" />
   </ItemGroup>
 </Project>

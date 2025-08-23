@@ -19,6 +19,7 @@ public:
 	Camera()
 	{
 		transform = new Transform();
+		_projection = new Matrix4x4();
 	}
 
 	~Camera()
@@ -30,9 +31,10 @@ public:
 	void CalculateProjectionMatrix()
 	{
 		Matrix4x4 transformation = transform->LocalToWorldMatrix();
-		Matrix4x4 projection = *Matrix4x4::Perspective(fieldOfView, aspect, nearClipPlane, farClipPlane);
-		Matrix4x4 view = *Matrix4x4::Inverse(transformation);
-		_projection = projection * view;
+		Matrix4x4 view = Matrix4x4::Inverse(transformation);
+		Matrix4x4 projection = Matrix4x4::Perspective(fieldOfView, aspect, nearClipPlane, farClipPlane);
+
+		*_projection = projection * view;
 	}
 
 

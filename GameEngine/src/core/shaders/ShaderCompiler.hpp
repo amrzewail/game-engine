@@ -84,7 +84,7 @@ public:
 
 			if (line.empty() || line == "\n" || line == " " || line == "\0") continue;
 
-			std::cout << line.size() << ">>" << line << std::endl;
+			//std::cout << line.size() << ">>" << line << std::endl;
 
 			if (Token(line, "#define"))
 			{
@@ -141,11 +141,11 @@ public:
 
 		iss = std::istringstream(vertShader);
 		lineIndex = 0;
-		for (std::string line; std::getline(iss, line); ) std::cout << lineIndex++ << ">>" << line << std::endl;
+		//for (std::string line; std::getline(iss, line); ) std::cout << lineIndex++ << ">>" << line << std::endl;
 
 		iss = std::istringstream(fragShader);
 		lineIndex = 0;
-		for (std::string line; std::getline(iss, line); ) std::cout << lineIndex++ << ">>" << line << std::endl;
+		//for (std::string line; std::getline(iss, line); ) std::cout << lineIndex++ << ">>" << line << std::endl;
 
 		Shader* shader = Shader::Create(vertShader.c_str(), fragShader.c_str());
 		for (auto d : defines)

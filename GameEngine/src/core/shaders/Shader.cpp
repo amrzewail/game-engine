@@ -175,3 +175,23 @@ void Shader::SetMatrix4x4(const std::string& name, const Matrix4x4& m) const
 
 	glUniformMatrix4fv(loc, 1, GL_FALSE, m.Data());
 }
+
+
+void Shader::SetMatrix4x4Array(const std::string& name, const Matrix4x4 array[], int length) const
+{
+	if (length <= 0) return;
+	const int loc = glGetUniformLocation(id, name.c_str());
+	if (loc < 0)
+	{
+#ifdef ENABLE_LOGGING
+		std::cerr << "Couldn't find " << name << std::endl;
+#endif
+		return;
+	}
+	std::vector<float*> mats;
+	for (int i = 0; i < length; i++)
+	{
+		mats.push_back(array[i].Data());
+	}
+	glUniformMatrix4fv(loc, length, GL_FALSE, *mats.data());
+}
