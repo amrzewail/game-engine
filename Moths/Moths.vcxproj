@@ -106,17 +106,21 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;MOTHS_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;MOTHS_EXPORTS;_WINDOWS;NOMINMAX;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)Moths\include\Moths\Export.h;$(SolutionDir)Moths\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
     </Link>
+    <PreBuildEvent>
+      <Command>xcopy /i /s /y "$(ProjectDir)data" "$(TargetDir)\data"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -124,32 +128,107 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;MOTHS_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;MOTHS_EXPORTS;_WINDOWS;NOMINMAX;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)Moths\include\Moths\Export.h;$(SolutionDir)Moths\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
     </Link>
+    <PreBuildEvent>
+      <Command>xcopy /i /s /y "$(ProjectDir)data" "$(TargetDir)\data"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
+    <ClInclude Include="include\libs\image.h" />
+    <ClInclude Include="include\libs\stb_image.h" />
+    <ClInclude Include="include\Moths\Animation\Animation.h" />
+    <ClInclude Include="include\Moths\Animation\Armature.h" />
+    <ClInclude Include="include\Moths\Animation\Bone.h" />
+    <ClInclude Include="include\Moths\Animation\BoneWeight.h" />
+    <ClInclude Include="include\Moths\Animation\Keyframe.h" />
+    <ClInclude Include="include\Moths\Animation\KeyframeProperty.h" />
+    <ClInclude Include="include\Moths\Animation\MeshBone.h" />
+    <ClInclude Include="include\Moths\API.h" />
+    <ClInclude Include="include\Moths\AssetManagement\Asset.h" />
+    <ClInclude Include="include\Moths\AssetManagement\Assets.h" />
+    <ClInclude Include="include\Moths\AssetManagement\Data\Model.h" />
+    <ClInclude Include="include\Moths\AssetManagement\GameObjectAsset.h" />
+    <ClInclude Include="include\Moths\AssetManagement\Importers\AssimpImporter.h" />
+    <ClInclude Include="include\Moths\AssetManagement\ModelAsset.h" />
+    <ClInclude Include="include\Moths\AssetManagement\ModelImporter.h" />
+    <ClInclude Include="include\Moths\AssetManagement\ShaderAsset.h" />
+    <ClInclude Include="include\Moths\AssetManagement\ShaderCompiler.h" />
+    <ClInclude Include="include\Moths\AssetManagement\TextAsset.h" />
+    <ClInclude Include="include\Moths\AssetManagement\TextureAsset.h" />
+    <ClInclude Include="include\Moths\Callbacks.h" />
+    <ClInclude Include="include\Moths\Component\Component.h" />
+    <ClInclude Include="include\Moths\Component\MeshRenderer.h" />
+    <ClInclude Include="include\Moths\Component\Renderer.h" />
+    <ClInclude Include="include\Moths\Core\Color.h" />
+    <ClInclude Include="include\Moths\Core\Debug.h" />
+    <ClInclude Include="include\Moths\Core\Guid.h" />
+    <ClInclude Include="include\Moths\Core\Material.h" />
+    <ClInclude Include="include\Moths\Core\Math.h" />
+    <ClInclude Include="include\Moths\Core\Matrix4x4.h" />
+    <ClInclude Include="include\Moths\Core\Mesh.h" />
+    <ClInclude Include="include\Moths\Core\MeshContainer.h" />
+    <ClInclude Include="include\Moths\Core\Quad.h" />
+    <ClInclude Include="include\Moths\Core\Quaternion.h" />
+    <ClInclude Include="include\Moths\Core\Screen.h" />
+    <ClInclude Include="include\Moths\Core\Shader.h" />
+    <ClInclude Include="include\Moths\Core\Submesh.h" />
+    <ClInclude Include="include\Moths\Core\Texture.h" />
+    <ClInclude Include="include\Moths\Core\Transform.h" />
+    <ClInclude Include="include\Moths\Core\Utilities.h" />
+    <ClInclude Include="include\Moths\Core\Vector.h" />
+    <ClInclude Include="include\Moths\Core\Vector2.h" />
+    <ClInclude Include="include\Moths\Core\Vector4.h" />
+    <ClInclude Include="include\Moths\Entity\Camera.h" />
+    <ClInclude Include="include\Moths\Entity\GameObject.h" />
+    <ClInclude Include="include\Moths\Events\Event.h" />
+    <ClInclude Include="include\Moths\Lighting\DirectionalLight.h" />
+    <ClInclude Include="include\Moths\Lighting\Light.h" />
+    <ClInclude Include="include\Moths\Lighting\Lights.h" />
+    <ClInclude Include="include\Moths\Lighting\LightType.h" />
     <ClInclude Include="include\Moths\Moths.h" />
+    <ClInclude Include="include\Moths\Rendering\BloomRenderPass.h" />
+    <ClInclude Include="include\Moths\Rendering\FXAARenderPass.h" />
+    <ClInclude Include="include\Moths\Rendering\IRenderPass.h" />
+    <ClInclude Include="include\Moths\Rendering\Renderers.h" />
+    <ClInclude Include="include\Moths\Rendering\SceneRenderPass.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="include\libs\image.cpp" />
+    <ClCompile Include="src\Component\Component.cpp" />
+    <ClCompile Include="src\Core\Material.cpp" />
+    <ClCompile Include="src\Core\Screen.cpp" />
+    <ClCompile Include="src\Entity\Camera.cpp" />
+    <ClCompile Include="src\Lighting\Light.cpp" />
+    <ClCompile Include="src\Lighting\Lights.cpp" />
+    <ClCompile Include="src\Core\Quad.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\AssetManagement\Assets.cpp" />
+    <ClCompile Include="src\Core\Math.cpp" />
+    <ClCompile Include="src\Core\Quaternion.cpp" />
+    <ClCompile Include="src\Core\Shader.cpp" />
+    <ClCompile Include="src\Entity\GameObject.cpp" />
     <ClCompile Include="src\Moths.cpp" />
+    <ClCompile Include="src\Rendering\Renderer.cpp" />
+    <ClCompile Include="src\Rendering\Renderers.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
